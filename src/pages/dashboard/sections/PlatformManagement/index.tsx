@@ -6,12 +6,13 @@ import HomePageSettings from "./sections/HomePageSettings";
 import PartnersManagement from "./sections/PartnersManagement";
 import ContactSettings from "./sections/ContactSettings";
 import ThemeManagement from "./sections/ThemeManagement";
+import GithubSettings from "./sections/GithubSettings";
 
 const PlatformManagement = () => {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="registration" className="space-y-6">
-        <TabsList className="grid grid-cols-3 lg:grid-cols-7 w-full">
+        <TabsList className="grid grid-cols-3 lg:grid-cols-8 w-full">
           <TabsTrigger value="registration">Registration</TabsTrigger>
           <TabsTrigger value="smtp">SMTP</TabsTrigger>
           <TabsTrigger value="legal">Legal Documents</TabsTrigger>
@@ -19,6 +20,7 @@ const PlatformManagement = () => {
           <TabsTrigger value="partners">Partners</TabsTrigger>
           <TabsTrigger value="contact">Contact</TabsTrigger>
           <TabsTrigger value="themes">Themes</TabsTrigger>
+          <TabsTrigger value="github">GitHub</TabsTrigger>
         </TabsList>
 
         <TabsContent value="registration" className="space-y-4">
@@ -47,6 +49,10 @@ const PlatformManagement = () => {
 
         <TabsContent value="themes" className="space-y-4">
           <ThemeManagement />
+        </TabsContent>
+
+        <TabsContent value="github" className="space-y-4">
+          <GithubSettings />
         </TabsContent>
       </Tabs>
     </div>
