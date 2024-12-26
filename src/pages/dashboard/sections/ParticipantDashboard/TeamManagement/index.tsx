@@ -44,7 +44,9 @@ const TeamManagement = () => {
               name
             ),
             mentor:mentor_id (
-              full_name
+              profiles (
+                full_name
+              )
             ),
             members:team_members (
               id,
@@ -59,7 +61,19 @@ const TeamManagement = () => {
         .maybeSingle();
 
       if (error) throw error;
-      return data;
+      
+      if (!data) return null;
+
+      // Transform the data to match TeamWithDetails type
+      const transformedData = {
+        ...data,
+        teams: data.teams ? {
+          ...data.teams,
+          mentor: data.teams.mentor?.profiles?.[0] || null
+        } : null
+      };
+
+      return transformedData;
     },
   });
 

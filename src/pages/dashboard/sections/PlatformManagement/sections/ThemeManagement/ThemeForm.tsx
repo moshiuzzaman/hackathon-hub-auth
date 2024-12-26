@@ -11,7 +11,9 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { ColorField } from "./components/ColorPicker";
 import { FontField } from "./components/FontPicker";
-import type { Theme, ThemeFormData } from "./types/theme";
+// import type { Theme, ThemeFormData } from "./types/theme";
+// to:
+import type { Theme, ThemeFormData } from "./types";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),

@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import type { Control } from "react-hook-form";
-import type { ThemeFormData } from "../types/theme";
+import type { ThemeFormData } from "../types";
 
 interface ColorFieldProps {
   control: Control<ThemeFormData>;
@@ -13,7 +13,7 @@ export const ColorField = ({ control, colorKey, label }: ColorFieldProps) => {
   return (
     <FormField
       control={control}
-      name={`colors.${colorKey}`}
+      name={`colors.${String(colorKey)}`}
       render={({ field }) => (
         <FormItem>
           <FormLabel className="capitalize">{label}</FormLabel>
