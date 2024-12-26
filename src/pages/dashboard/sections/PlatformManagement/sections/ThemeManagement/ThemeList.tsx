@@ -37,6 +37,12 @@ const ThemeList = ({ themes, onEdit }: ThemeListProps) => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
+      // Check if theme is default before attempting deletion
+      const themeToDelete = themes.find(theme => theme.id === id);
+      if (themeToDelete?.type === "default") {
+        throw new Error("Cannot delete default theme");
+      }
+
       const { error } = await supabase
         .from("themes")
         .delete()
@@ -50,10 +56,23 @@ const ThemeList = ({ themes, onEdit }: ThemeListProps) => {
       setDeleteId(null);
     },
     onError: (error) => {
-      toast.error("Failed to delete theme");
-      console.error(error);
+      toast.error(error instanceof Error ? error.message : "Failed to delete theme");
+      setDeleteId(null);
     },
   });
+
+  const handleDelete = (id: string) => {
+    const theme = themes.find(t => t.id === id);
+    if (theme?.type === "default") {
+      toast.error("Cannot delete default theme");
+      return;
+    }
+    setDeleteId(id);
+  };
+
+  const handleEdit = (theme: Theme) => {
+    onEdit(theme);
+  };
 
   return (
     <>
@@ -89,7 +108,7 @@ const ThemeList = ({ themes, onEdit }: ThemeListProps) => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => onEdit(theme)}
+                    onClick={() => handleEdit(theme)}
                     disabled={theme.type === "default"}
                   >
                     <Edit className="h-4 w-4" />
@@ -97,7 +116,7 @@ const ThemeList = ({ themes, onEdit }: ThemeListProps) => {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setDeleteId(theme.id)}
+                    onClick={() => handleDelete(theme.id)}
                     disabled={theme.type === "default"}
                   >
                     <Trash2 className="h-4 w-4" />
