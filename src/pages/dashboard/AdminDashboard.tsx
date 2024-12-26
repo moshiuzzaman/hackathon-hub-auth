@@ -4,8 +4,8 @@ import { useSessionContext } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { 
-  Users, Settings, Calendar, Newspaper, UserCheck, FileText, 
-  Gift, Home, Image, Phone, Building 
+  Users, Settings, Calendar, Newspaper, UserCheck, 
+  Gift, Building 
 } from "lucide-react";
 import { toast } from "sonner";
 import UserManagement from "./sections/UserManagement";
@@ -13,11 +13,7 @@ import PlatformManagement from "./sections/PlatformManagement";
 import EventManagement from "./sections/EventManagement";
 import NewsManagement from "./sections/NewsManagement";
 import MentorApplications from "./sections/UserManagement/MentorApplications";
-import LegalDocuments from "./sections/LegalDocuments";
 import BenefitsManagement from "./sections/BenefitsManagement";
-import HomePageSettings from "./sections/PublicPages/HomePageSettings";
-import PartnersManagement from "./sections/PublicPages/PartnersManagement";
-import ContactSettings from "./sections/PublicPages/ContactSettings";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -99,12 +95,7 @@ const AdminDashboard = () => {
     { id: "platform", icon: Settings, label: "Platform Management", active: activeSection === "platform" },
     { id: "events", icon: Calendar, label: "Event Management", active: activeSection === "events" },
     { id: "news", icon: Newspaper, label: "News Management", active: activeSection === "news" },
-    { id: "legal", icon: FileText, label: "Legal Documents", active: activeSection === "legal" },
     { id: "benefits", icon: Gift, label: "Benefits", active: activeSection === "benefits" },
-    // New sections for public pages
-    { id: "homepage", icon: Home, label: "Home Page Settings", active: activeSection === "homepage" },
-    { id: "partners", icon: Building, label: "Partners", active: activeSection === "partners" },
-    { id: "contact", icon: Phone, label: "Contact Settings", active: activeSection === "contact" },
   ];
 
   const renderSection = () => {
@@ -119,16 +110,8 @@ const AdminDashboard = () => {
         return <EventManagement />;
       case "news":
         return <NewsManagement />;
-      case "legal":
-        return <LegalDocuments />;
       case "benefits":
         return <BenefitsManagement />;
-      case "homepage":
-        return <HomePageSettings />;
-      case "partners":
-        return <PartnersManagement />;
-      case "contact":
-        return <ContactSettings />;
       default:
         return (
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
