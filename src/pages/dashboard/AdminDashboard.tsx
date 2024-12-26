@@ -3,10 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Users, Settings, Calendar, Newspaper } from "lucide-react";
+import { Users, Settings, Calendar, Newspaper, Image } from "lucide-react";
 import { toast } from "sonner";
 import UserManagement from "./sections/UserManagement";
 import PlatformManagement from "./sections/PlatformManagement";
+import EventManagement from "./sections/EventManagement";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -53,6 +54,8 @@ const AdminDashboard = () => {
         return <UserManagement />;
       case "platform":
         return <PlatformManagement />;
+      case "events":
+        return <EventManagement />;
       default:
         return (
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
