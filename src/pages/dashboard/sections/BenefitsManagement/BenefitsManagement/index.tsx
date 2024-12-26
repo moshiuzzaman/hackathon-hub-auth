@@ -136,7 +136,7 @@ const BenefitsManagement = () => {
             setEditingBenefit(null);
           }
         }}
-        benefit={editingBenefit}
+        initialData={editingBenefit}
         onSuccess={() => {
           refetch();
         }}
