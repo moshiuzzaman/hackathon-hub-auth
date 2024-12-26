@@ -6,7 +6,6 @@ import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
@@ -42,7 +41,7 @@ const ThemeForm = ({ open, onOpenChange, selectedTheme, onClose }: ThemeFormProp
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: selectedTheme?.name ?? "",
-      type: "custom",
+      type: selectedTheme?.type ?? "custom",
       colors: selectedTheme?.colors ?? {
         primary: "#8B5CF6",
         secondary: "#E5DEFF",
@@ -111,7 +110,10 @@ const ThemeForm = ({ open, onOpenChange, selectedTheme, onClose }: ThemeFormProp
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Name</FormLabel>
-                  <Input {...field} />
+                  <input
+                    {...field}
+                    className="w-full px-3 py-2 border rounded-md"
+                  />
                   <FormMessage />
                 </FormItem>
               )}
