@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -61,6 +62,36 @@ const ThemeList = ({ themes, onEdit }: ThemeListProps) => {
     },
   });
 
+  const toggleActiveMutation = useMutation({
+    mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
+      // First, deactivate all other themes
+      if (isActive) {
+        const { error: deactivateError } = await supabase
+          .from("themes")
+          .update({ is_active: false })
+          .neq("id", id);
+
+        if (deactivateError) throw deactivateError;
+      }
+
+      // Then update the selected theme
+      const { error } = await supabase
+        .from("themes")
+        .update({ is_active: isActive })
+        .eq("id", id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["themes"] });
+      toast.success("Theme status updated successfully");
+    },
+    onError: (error) => {
+      toast.error("Failed to update theme status");
+      console.error(error);
+    },
+  });
+
   const handleDelete = (id: string) => {
     const theme = themes.find(t => t.id === id);
     if (theme?.type === "default") {
@@ -72,6 +103,10 @@ const ThemeList = ({ themes, onEdit }: ThemeListProps) => {
 
   const handleEdit = (theme: Theme) => {
     onEdit(theme);
+  };
+
+  const handleToggleActive = (id: string, currentState: boolean) => {
+    toggleActiveMutation.mutate({ id, isActive: !currentState });
   };
 
   return (
@@ -96,9 +131,10 @@ const ThemeList = ({ themes, onEdit }: ThemeListProps) => {
                 </Badge>
               </TableCell>
               <TableCell>
-                <Badge variant={theme.is_active ? "default" : "outline"}>
-                  {theme.is_active ? "Active" : "Inactive"}
-                </Badge>
+                <Switch
+                  checked={theme.is_active}
+                  onCheckedChange={() => handleToggleActive(theme.id, theme.is_active)}
+                />
               </TableCell>
               <TableCell>
                 {format(new Date(theme.created_at), "MMM dd, yyyy")}
