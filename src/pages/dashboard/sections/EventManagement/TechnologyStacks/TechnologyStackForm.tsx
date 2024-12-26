@@ -35,16 +35,22 @@ const TechnologyStackForm = ({ open, onOpenChange, stack }: TechnologyStackFormP
 
   const mutation = useMutation({
     mutationFn: async (values: FormData) => {
+      const payload = {
+        name: values.name,
+        icon: values.icon,
+        is_enabled: true, // Set default value for new stacks
+      };
+
       if (stack) {
         const { error } = await supabase
           .from("technology_stacks")
-          .update(values)
+          .update(payload)
           .eq("id", stack.id);
         if (error) throw error;
       } else {
         const { error } = await supabase
           .from("technology_stacks")
-          .insert([values]);
+          .insert([payload]);
         if (error) throw error;
       }
     },

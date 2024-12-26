@@ -59,14 +59,22 @@ const EventForm = ({ open, onOpenChange, selectedDate, event }: EventFormProps) 
 
   const mutation = useMutation({
     mutationFn: async (values: FormData) => {
+      const payload = {
+        ...values,
+        start_time: new Date(values.start_time).toISOString(),
+        end_time: new Date(values.end_time).toISOString(),
+      };
+
       if (event) {
         const { error } = await supabase
           .from("events")
-          .update(values)
+          .update(payload)
           .eq("id", event.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from("events").insert([values]);
+        const { error } = await supabase
+          .from("events")
+          .insert([payload]);
         if (error) throw error;
       }
     },

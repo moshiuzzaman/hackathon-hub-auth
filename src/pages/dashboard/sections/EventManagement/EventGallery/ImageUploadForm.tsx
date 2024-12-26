@@ -28,7 +28,9 @@ const formSchema = z.object({
   file: z.any().refine((file) => file instanceof File, "Image is required"),
   event_id: z.string().optional(),
   description: z.string().optional(),
-  tags: z.string().transform((str) => str.split(",").map((s) => s.trim())).optional(),
+  tags: z.string()
+    .optional()
+    .transform((str) => str ? str.split(",").map((s) => s.trim()) : []), // Transform to string array or empty array
 });
 
 type FormData = z.infer<typeof formSchema>;
