@@ -54,7 +54,7 @@ export const parseTheme = (data: {
   };
 };
 
-export const isThemeColors = (json: Json): json is ThemeColors => {
+const isThemeColors = (json: Json): json is ThemeColors => {
   if (typeof json !== 'object' || !json) return false;
   
   const requiredKeys = ['primary', 'secondary'];
@@ -64,7 +64,7 @@ export const isThemeColors = (json: Json): json is ThemeColors => {
   );
 };
 
-export const isThemeFonts = (json: Json): json is ThemeFonts => {
+const isThemeFonts = (json: Json): json is ThemeFonts => {
   if (typeof json !== 'object' || !json) return false;
   
   return Array.isArray((json as any).primary) &&
