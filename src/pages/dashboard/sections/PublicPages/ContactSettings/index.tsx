@@ -16,7 +16,7 @@ const ContactSettings = () => {
       const { data, error } = await supabase
         .from("contact_settings")
         .select("*")
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -29,10 +29,10 @@ const ContactSettings = () => {
 
     const formData = new FormData(e.currentTarget);
     const updates = {
-      email: formData.get("email"),
-      phone: formData.get("phone"),
-      address: formData.get("address"),
-      additional_info: formData.get("additional_info"),
+      email: String(formData.get("email")),
+      phone: String(formData.get("phone")),
+      address: String(formData.get("address")),
+      additional_info: String(formData.get("additional_info")),
       updated_at: new Date().toISOString(),
     };
 

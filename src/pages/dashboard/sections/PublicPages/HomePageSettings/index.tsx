@@ -16,7 +16,7 @@ const HomePageSettings = () => {
       const { data, error } = await supabase
         .from("home_page_settings")
         .select("*")
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
@@ -29,9 +29,9 @@ const HomePageSettings = () => {
 
     const formData = new FormData(e.currentTarget);
     const updates = {
-      hero_title: formData.get("hero_title"),
-      hero_subtitle: formData.get("hero_subtitle"),
-      hero_image_url: formData.get("hero_image_url"),
+      hero_title: String(formData.get("hero_title")),
+      hero_subtitle: String(formData.get("hero_subtitle")),
+      hero_image_url: String(formData.get("hero_image_url")),
       updated_at: new Date().toISOString(),
     };
 

@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, Pencil, Trash } from "lucide-react";
+import { Plus, Trash } from "lucide-react";
 import { toast } from "sonner";
 
 const PartnersManagement = () => {
@@ -29,10 +29,10 @@ const PartnersManagement = () => {
 
     const formData = new FormData(e.currentTarget);
     const partner = {
-      name: formData.get("name"),
-      logo_url: formData.get("logo_url"),
-      website_url: formData.get("website_url"),
-      display_order: parseInt(formData.get("display_order") as string) || null,
+      name: String(formData.get("name")),
+      logo_url: String(formData.get("logo_url")),
+      website_url: String(formData.get("website_url")),
+      display_order: parseInt(String(formData.get("display_order"))) || null,
     };
 
     try {
