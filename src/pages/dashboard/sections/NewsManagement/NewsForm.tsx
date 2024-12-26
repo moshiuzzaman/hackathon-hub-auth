@@ -55,10 +55,19 @@ const NewsForm = ({ open, onOpenChange, selectedNews, onClose }: NewsFormProps) 
 
   useEffect(() => {
     if (selectedNews) {
+      // Ensure meta_info is properly typed when setting form values
+      const defaultMetaInfo = { tags: [], category: "" };
+      const metaInfo = typeof selectedNews.meta_info === 'object' && selectedNews.meta_info !== null
+        ? selectedNews.meta_info
+        : defaultMetaInfo;
+
       form.reset({
         title: selectedNews.title,
         content: selectedNews.content,
-        meta_info: selectedNews.meta_info,
+        meta_info: {
+          tags: Array.isArray(metaInfo.tags) ? metaInfo.tags : [],
+          category: typeof metaInfo.category === 'string' ? metaInfo.category : "",
+        },
         published_at: selectedNews.published_at,
       });
       editor?.commands.setContent(selectedNews.content);
