@@ -12,7 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { toast } from "sonner";
-import BenefitForm from "./BenefitForm";
+import { BenefitForm } from "./BenefitForm";
 import BulkUploadForm from "./BulkUploadForm";
 
 const BenefitsManagement = () => {

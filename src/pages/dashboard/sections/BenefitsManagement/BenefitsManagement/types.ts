@@ -10,6 +10,8 @@ export const benefitFormSchema = z.object({
 
 export type BenefitFormValues = z.infer<typeof benefitFormSchema>;
 
+export type BenefitFormData = BenefitFormValues;
+
 export interface BenefitFormProps {
   initialData?: {
     id: string;

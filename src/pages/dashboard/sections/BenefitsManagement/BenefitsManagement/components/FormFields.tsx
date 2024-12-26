@@ -3,14 +3,15 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { UseFormReturn } from "react-hook-form";
-import { BenefitFormData } from "../types";
+import { BenefitFormValues } from "../types";
 
 interface FormFieldsProps {
-  form: UseFormReturn<BenefitFormData>;
+  form: UseFormReturn<BenefitFormValues>;
   vendors: Array<{ id: string; name: string }>;
+  isSubmitting: boolean;
 }
 
-export const FormFields = ({ form, vendors }: FormFieldsProps) => {
+export const FormFields = ({ form, vendors, isSubmitting }: FormFieldsProps) => {
   return (
     <div className="space-y-4">
       <FormField
@@ -19,7 +20,7 @@ export const FormFields = ({ form, vendors }: FormFieldsProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>Vendor</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a vendor" />
@@ -49,6 +50,7 @@ export const FormFields = ({ form, vendors }: FormFieldsProps) => {
                 {...field} 
                 className="min-h-[120px]"
                 placeholder="Enter coupon codes, one per line"
+                disabled={isSubmitting}
               />
             </FormControl>
             <FormMessage />
@@ -63,7 +65,7 @@ export const FormFields = ({ form, vendors }: FormFieldsProps) => {
           <FormItem>
             <FormLabel>Expiry Date</FormLabel>
             <FormControl>
-              <Input {...field} type="date" />
+              <Input {...field} type="date" disabled={isSubmitting} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -76,7 +78,7 @@ export const FormFields = ({ form, vendors }: FormFieldsProps) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>User Type</FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value}>
+            <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isSubmitting}>
               <FormControl>
                 <SelectTrigger>
                   <SelectValue placeholder="Select user type" />
