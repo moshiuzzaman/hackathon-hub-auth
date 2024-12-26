@@ -58,7 +58,8 @@ const TeamManagement = () => {
   });
 
   // Create team mutation
-  const createTeam = useMutation({
+
+const createTeam = useMutation({
     mutationFn: async ({
       name,
       stackId,
@@ -70,6 +71,12 @@ const TeamManagement = () => {
       description: string;
       lookingForMembers: boolean;
     }) => {
+      // First, generate a team code using the database function
+      const { data: codeData, error: codeError } = await supabase
+        .rpc('generate_team_code');
+      
+      if (codeError) throw codeError;
+      
       const { data: team, error: teamError } = await supabase
         .from("teams")
         .insert({
@@ -78,6 +85,7 @@ const TeamManagement = () => {
           leader_id: session?.user.id,
           description,
           looking_for_members: lookingForMembers,
+          join_code: codeData,
         })
         .select()
         .single();

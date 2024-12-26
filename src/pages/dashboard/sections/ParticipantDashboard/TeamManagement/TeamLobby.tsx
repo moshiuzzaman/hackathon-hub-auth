@@ -18,7 +18,7 @@ const TeamLobby = () => {
   const { data: teams, isLoading } = useQuery({
     queryKey: ["teams-lobby"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: teamsData, error: teamsError } = await supabase
         .from("teams")
         .select(`
           id,
@@ -26,7 +26,7 @@ const TeamLobby = () => {
           description,
           looking_for_members,
           max_members,
-          members:team_members(count),
+          members:team_members(id),
           leader:profiles!teams_leader_id_fkey(
             id,
             full_name
@@ -36,11 +36,17 @@ const TeamLobby = () => {
             name
           )
         `)
-        .eq("looking_for_members", true)
-        .gt("max_members", "(select count(*) from team_members where team_id = teams.id)");
+        .eq("looking_for_members", true);
 
-      if (error) throw error;
-      return data;
+      if (teamsError) throw teamsError;
+
+      // Transform the data to include member count
+      return teamsData.map(team => ({
+        ...team,
+        members: {
+          count: team.members?.length || 0
+        }
+      }));
     },
   });
 
