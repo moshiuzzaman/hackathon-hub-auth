@@ -12,61 +12,13 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { ColorField } from "./components/ColorPicker";
 import { FontField } from "./components/FontPicker";
-import type { Theme, ThemeFormData, ThemeColors, ThemeFonts } from "./types";
-
-const defaultColors: ThemeColors = {
-  background: "0 0% 100%",
-  foreground: "222.2 84% 4.9%",
-  card: "0 0% 100%",
-  cardForeground: "222.2 84% 4.9%",
-  popover: "0 0% 100%",
-  popoverForeground: "222.2 84% 4.9%",
-  primary: "222.2 47.4% 11.2%",
-  primaryForeground: "210 40% 98%",
-  secondary: "210 40% 96.1%",
-  secondaryForeground: "222.2 47.4% 11.2%",
-  muted: "210 40% 96.1%",
-  mutedForeground: "215.4 16.3% 46.9%",
-  accent: "210 40% 96.1%",
-  accentForeground: "222.2 47.4% 11.2%",
-  destructive: "0 84.2% 60.2%",
-  destructiveForeground: "210 40% 98%",
-  border: "214.3 31.8% 91.4%",
-  input: "214.3 31.8% 91.4%",
-  ring: "222.2 84% 4.9%",
-};
-
-const defaultFonts: ThemeFonts = {
-  sans: ["Inter", "sans-serif"],
-  serif: ["Georgia", "serif"],
-  mono: ["Menlo", "monospace"],
-};
+import type { Theme, ThemeFormData } from "./types/theme";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   type: z.enum(["default", "custom"]).default("custom"),
   is_active: z.boolean().default(false),
-  colors: z.object({
-    background: z.string(),
-    foreground: z.string(),
-    card: z.string(),
-    cardForeground: z.string(),
-    popover: z.string(),
-    popoverForeground: z.string(),
-    primary: z.string(),
-    primaryForeground: z.string(),
-    secondary: z.string(),
-    secondaryForeground: z.string(),
-    muted: z.string(),
-    mutedForeground: z.string(),
-    accent: z.string(),
-    accentForeground: z.string(),
-    destructive: z.string(),
-    destructiveForeground: z.string(),
-    border: z.string(),
-    input: z.string(),
-    ring: z.string(),
-  }),
+  colors: z.record(z.string()),
   fonts: z.object({
     sans: z.array(z.string()),
     serif: z.array(z.string()),
@@ -90,8 +42,32 @@ const ThemeForm = ({ open, onOpenChange, selectedTheme, onClose }: ThemeFormProp
     defaultValues: {
       name: selectedTheme?.name ?? "",
       type: "custom",
-      colors: selectedTheme?.colors ?? defaultColors,
-      fonts: selectedTheme?.fonts ?? defaultFonts,
+      colors: selectedTheme?.colors ?? {
+        background: "0 0% 100%",
+        foreground: "222.2 84% 4.9%",
+        card: "0 0% 100%",
+        cardForeground: "222.2 84% 4.9%",
+        popover: "0 0% 100%",
+        popoverForeground: "222.2 84% 4.9%",
+        primary: "222.2 47.4% 11.2%",
+        primaryForeground: "210 40% 98%",
+        secondary: "210 40% 96.1%",
+        secondaryForeground: "222.2 47.4% 11.2%",
+        muted: "210 40% 96.1%",
+        mutedForeground: "215.4 16.3% 46.9%",
+        accent: "210 40% 96.1%",
+        accentForeground: "222.2 47.4% 11.2%",
+        destructive: "0 84.2% 60.2%",
+        destructiveForeground: "210 40% 98%",
+        border: "214.3 31.8% 91.4%",
+        input: "214.3 31.8% 91.4%",
+        ring: "222.2 84% 4.9%",
+      },
+      fonts: selectedTheme?.fonts ?? {
+        sans: ["Inter", "sans-serif"],
+        serif: ["Georgia", "serif"],
+        mono: ["Menlo", "monospace"],
+      },
       is_active: selectedTheme?.is_active ?? false,
     },
   });
@@ -103,11 +79,24 @@ const ThemeForm = ({ open, onOpenChange, selectedTheme, onClose }: ThemeFormProp
         if (selectedTheme) {
           const { error } = await supabase
             .from("themes")
-            .update(values)
+            .update({
+              name: values.name,
+              type: values.type,
+              is_active: values.is_active,
+              colors: values.colors,
+              fonts: values.fonts,
+              updated_at: new Date().toISOString(),
+            })
             .eq("id", selectedTheme.id);
           if (error) throw error;
         } else {
-          const { error } = await supabase.from("themes").insert([values]);
+          const { error } = await supabase.from("themes").insert([{
+            name: values.name,
+            type: values.type,
+            is_active: values.is_active,
+            colors: values.colors,
+            fonts: values.fonts,
+          }]);
           if (error) throw error;
         }
       } finally {
@@ -161,11 +150,11 @@ const ThemeForm = ({ open, onOpenChange, selectedTheme, onClose }: ThemeFormProp
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Colors</h3>
               <div className="grid grid-cols-2 gap-4">
-                {Object.keys(defaultColors).map((key) => (
+                {Object.keys(form.getValues().colors).map((key) => (
                   <ColorField
                     key={key}
                     control={form.control}
-                    colorKey={key as keyof ThemeColors}
+                    colorKey={key}
                     label={key.replace(/([A-Z])/g, " $1").trim()}
                   />
                 ))}
@@ -175,11 +164,11 @@ const ThemeForm = ({ open, onOpenChange, selectedTheme, onClose }: ThemeFormProp
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Fonts</h3>
               <div className="space-y-4">
-                {Object.keys(defaultFonts).map((key) => (
+                {Object.keys(form.getValues().fonts).map((key) => (
                   <FontField
                     key={key}
                     control={form.control}
-                    fontKey={key as keyof ThemeFonts}
+                    fontKey={key}
                     label={key}
                   />
                 ))}
