@@ -30,7 +30,7 @@ const formSchema = z.object({
   description: z.string().optional(),
   tags: z.string()
     .optional()
-    .transform((str) => str ? str.split(",").map((s) => s.trim()) : []), // Transform to string array or empty array
+    .transform((str) => str ? str.split(",").map((s) => s.trim()) : []) as z.ZodType<string[]>,
 });
 
 type FormData = z.infer<typeof formSchema>;

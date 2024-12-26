@@ -59,10 +59,14 @@ const EventForm = ({ open, onOpenChange, selectedDate, event }: EventFormProps) 
 
   const mutation = useMutation({
     mutationFn: async (values: FormData) => {
+      if (!values.title) throw new Error("Title is required");
+      
       const payload = {
-        ...values,
+        title: values.title,
+        description: values.description,
         start_time: new Date(values.start_time).toISOString(),
         end_time: new Date(values.end_time).toISOString(),
+        meta_info: values.meta_info,
       };
 
       if (event) {
@@ -91,10 +95,6 @@ const EventForm = ({ open, onOpenChange, selectedDate, event }: EventFormProps) 
       console.error(error);
     },
   });
-
-  const onSubmit = (values: FormData) => {
-    mutation.mutate(values);
-  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
