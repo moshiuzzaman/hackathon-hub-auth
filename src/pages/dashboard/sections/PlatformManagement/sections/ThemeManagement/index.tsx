@@ -6,8 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Palette, Plus } from "lucide-react";
 import ThemeForm from "./ThemeForm";
 import ThemeList from "./ThemeList";
-import type { Theme } from "./types/theme";
-import { parseTheme } from "./types/theme";
+import type { Theme } from "./types";
 
 const ThemeManagement = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -22,10 +21,7 @@ const ThemeManagement = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      
-      return data
-        .map(parseTheme)
-        .filter((theme): theme is Theme => theme !== null);
+      return data as Theme[];
     },
   });
 

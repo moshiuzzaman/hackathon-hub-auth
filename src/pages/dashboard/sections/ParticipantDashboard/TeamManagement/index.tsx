@@ -7,24 +7,11 @@ import { Loader2 } from "lucide-react";
 import CreateTeamForm from "./CreateTeamForm";
 import JoinTeamForm from "./JoinTeamForm";
 import TeamDetails from "./TeamDetails";
-import type { TeamWithDetails, TechnologyStack } from "./types";
+import type { TeamWithDetails } from "./types";
 
 const TeamManagement = () => {
   const { session } = useSessionContext();
   const queryClient = useQueryClient();
-
-  // Fetch technology stacks
-  const { data: stacks = [] } = useQuery<TechnologyStack[]>({
-    queryKey: ["technology-stacks"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("technology_stacks")
-        .select("*")
-        .eq("is_enabled", true);
-      if (error) throw error;
-      return data;
-    },
-  });
 
   // Fetch user's team information
   const { data: teamMember, isLoading } = useQuery({
@@ -44,9 +31,8 @@ const TeamManagement = () => {
               name
             ),
             mentor:mentor_id (
-              profiles (
-                full_name
-              )
+              id,
+              full_name
             ),
             members:team_members (
               id,
@@ -61,19 +47,7 @@ const TeamManagement = () => {
         .maybeSingle();
 
       if (error) throw error;
-      
-      if (!data) return null;
-
-      // Transform the data to match TeamWithDetails type
-      const transformedData = {
-        ...data,
-        teams: data.teams ? {
-          ...data.teams,
-          mentor: data.teams.mentor?.profiles?.[0] || null
-        } : null
-      };
-
-      return transformedData;
+      return data;
     },
   });
 
@@ -206,7 +180,7 @@ const TeamManagement = () => {
   return (
     <div className="space-y-6">
       <CreateTeamForm
-        stacks={stacks}
+        stacks={[]}
         onSubmit={(name, stackId) => createTeam.mutate({ name, stackId })}
         isLoading={createTeam.isPending}
       />

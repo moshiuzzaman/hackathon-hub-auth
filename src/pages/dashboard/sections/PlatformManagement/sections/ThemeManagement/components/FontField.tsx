@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Minus } from "lucide-react";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import type { Control } from "react-hook-form";
-import type { ThemeFormData } from "../types/theme";
+import type { ThemeFormData } from "../types";
 
 interface FontFieldProps {
   control: Control<ThemeFormData>;
@@ -15,7 +15,7 @@ export const FontField = ({ control, fontKey, label }: FontFieldProps) => {
   return (
     <FormField
       control={control}
-      name={`fonts.${fontKey}`}
+      name={`fonts.${String(fontKey)}`}
       render={({ field }) => (
         <FormItem>
           <FormLabel className="capitalize">{label}</FormLabel>
