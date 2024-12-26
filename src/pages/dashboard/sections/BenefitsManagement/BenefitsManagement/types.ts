@@ -10,8 +10,6 @@ export const benefitFormSchema = z.object({
 
 export type BenefitFormValues = z.infer<typeof benefitFormSchema>;
 
-export type BenefitFormData = BenefitFormValues;
-
 export interface BenefitFormProps {
   initialData?: {
     id: string;
@@ -21,6 +19,7 @@ export interface BenefitFormProps {
     user_type: string;
     is_active: boolean;
   } | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onSuccess: () => void;
-  onCancel: () => void;
 }

@@ -5,11 +5,12 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { FormFields } from "./components/FormFields";
 import { BenefitFormProps, BenefitFormValues, benefitFormSchema } from "./types";
 
-export const BenefitForm = ({ initialData, onSuccess, onCancel }: BenefitFormProps) => {
+export const BenefitForm = ({ initialData, open, onOpenChange, onSuccess }: BenefitFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<BenefitFormValues>({
@@ -82,6 +83,7 @@ export const BenefitForm = ({ initialData, onSuccess, onCancel }: BenefitFormPro
 
       toast.success(initialData ? "Benefit updated" : "Benefits created");
       onSuccess();
+      onOpenChange(false);
     } catch (error: any) {
       toast.error(error.message);
     } finally {
@@ -90,29 +92,36 @@ export const BenefitForm = ({ initialData, onSuccess, onCancel }: BenefitFormPro
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormFields 
-          form={form} 
-          vendors={vendors || []}
-          isSubmitting={isSubmitting}
-        />
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{initialData ? "Edit" : "Add"} Benefit</DialogTitle>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormFields 
+              form={form} 
+              vendors={vendors || []}
+              isSubmitting={isSubmitting}
+            />
 
-        <div className="flex justify-end gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onCancel}
-            disabled={isSubmitting}
-          >
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {initialData ? "Update" : "Create"} Benefit{!initialData && "s"}
-          </Button>
-        </div>
-      </form>
-    </Form>
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={isSubmitting}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {initialData ? "Update" : "Create"} Benefit{!initialData && "s"}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 };
 
