@@ -1,6 +1,6 @@
+import { ThemeColors, isThemeColors } from "./theme-colors";
+import { ThemeFonts, isThemeFonts } from "./theme-fonts";
 import type { Json } from "@/integrations/supabase/types";
-import type { ThemeColors, isThemeColors } from "./theme-colors";
-import type { ThemeFonts, isThemeFonts } from "./theme-fonts";
 
 export interface Theme {
   id: string;
@@ -14,13 +14,13 @@ export interface Theme {
   created_by: string | null;
 }
 
-export interface ThemeFormData {
+export type ThemeFormData = {
   name: string;
   type: 'default' | 'custom';
   is_active: boolean;
   colors: ThemeColors;
   fonts: ThemeFonts;
-}
+};
 
 export const parseTheme = (data: {
   id: string;
@@ -44,3 +44,5 @@ export const parseTheme = (data: {
     fonts: data.fonts,
   };
 };
+
+export type { ThemeColors, ThemeFonts };
