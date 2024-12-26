@@ -46,7 +46,7 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
     },
   });
 
-  const { data: users } = useQuery({
+  const { data: users = [] } = useQuery({
     queryKey: ["mentors"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -54,11 +54,11 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
         .select("id, full_name")
         .eq("role", "mentor");
       if (error) throw error;
-      return data;
+      return data || [];
     },
   });
 
-  const { data: vendors } = useQuery({
+  const { data: vendors = [] } = useQuery({
     queryKey: ["vendors"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -66,11 +66,11 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
         .select("*")
         .order("name");
       if (error) throw error;
-      return data;
+      return data || [];
     },
   });
 
-  const { data: unassignedBenefits } = useQuery({
+  const { data: unassignedBenefits = [] } = useQuery({
     queryKey: ["unassigned-benefits", selectedVendor],
     enabled: !!selectedVendor,
     queryFn: async () => {
@@ -81,7 +81,7 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
         .eq("is_assigned", false)
         .eq("is_active", true);
       if (error) throw error;
-      return data;
+      return data || [];
     },
   });
 
@@ -121,6 +121,7 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
       onOpenChange(false);
       setSelectedUsers([]);
       setSelectedVendor("");
+      form.reset();
     } catch (error: any) {
       toast.error(error.message);
     }
@@ -145,7 +146,7 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
                       <CommandInput placeholder="Search vendors..." />
                       <CommandEmpty>No vendors found.</CommandEmpty>
                       <CommandGroup className="max-h-40 overflow-y-auto">
-                        {vendors?.map((vendor) => (
+                        {vendors.map((vendor) => (
                           <CommandItem
                             key={vendor.id}
                             value={vendor.id}
@@ -178,7 +179,7 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
                       <CommandInput placeholder="Search users..." />
                       <CommandEmpty>No users found.</CommandEmpty>
                       <CommandGroup className="max-h-40 overflow-y-auto">
-                        {users?.map((user) => (
+                        {users.map((user) => (
                           <CommandItem
                             key={user.id}
                             value={user.id}
@@ -208,7 +209,7 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
 
             {selectedVendor && (
               <div className="text-sm text-muted-foreground">
-                Available benefits: {unassignedBenefits?.length || 0}
+                Available benefits: {unassignedBenefits.length}
               </div>
             )}
 
