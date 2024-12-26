@@ -55,19 +55,30 @@ const NewsForm = ({ open, onOpenChange, selectedNews, onClose }: NewsFormProps) 
 
   useEffect(() => {
     if (selectedNews) {
-      // Ensure meta_info is properly typed when setting form values
-      const defaultMetaInfo = { tags: [], category: "" };
-      const metaInfo = typeof selectedNews.meta_info === 'object' && selectedNews.meta_info !== null
-        ? selectedNews.meta_info
-        : defaultMetaInfo;
+      // Parse meta_info safely with type checking
+      let parsedMetaInfo = {
+        tags: [] as string[],
+        category: ""
+      };
+
+      if (selectedNews.meta_info && typeof selectedNews.meta_info === 'object' && !Array.isArray(selectedNews.meta_info)) {
+        const metaInfo = selectedNews.meta_info as Record<string, unknown>;
+        
+        // Safely check and assign tags
+        if (Array.isArray(metaInfo.tags)) {
+          parsedMetaInfo.tags = metaInfo.tags.filter(tag => typeof tag === 'string');
+        }
+        
+        // Safely check and assign category
+        if (typeof metaInfo.category === 'string') {
+          parsedMetaInfo.category = metaInfo.category;
+        }
+      }
 
       form.reset({
         title: selectedNews.title,
         content: selectedNews.content,
-        meta_info: {
-          tags: Array.isArray(metaInfo.tags) ? metaInfo.tags : [],
-          category: typeof metaInfo.category === 'string' ? metaInfo.category : "",
-        },
+        meta_info: parsedMetaInfo,
         published_at: selectedNews.published_at,
       });
       editor?.commands.setContent(selectedNews.content);

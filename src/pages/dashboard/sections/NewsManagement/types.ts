@@ -7,7 +7,7 @@ export interface News {
   meta_info: {
     tags?: string[];
     category?: string;
-  } | Json | null;
+  } | Json;
   published_at: string | null;
   created_by: string | null;
   created_at: string;
