@@ -5,17 +5,47 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { ColorPicker } from "./components/ColorPicker";
-import { FontPicker } from "./components/FontPicker";
-import type { Theme } from "./types";
+import { ColorField } from "./components/ColorPicker";
+import { FontField } from "./components/FontPicker";
+import type { Theme, ThemeFormData, ThemeColors, ThemeFonts } from "./types";
+
+const defaultColors: ThemeColors = {
+  background: "0 0% 100%",
+  foreground: "222.2 84% 4.9%",
+  card: "0 0% 100%",
+  cardForeground: "222.2 84% 4.9%",
+  popover: "0 0% 100%",
+  popoverForeground: "222.2 84% 4.9%",
+  primary: "222.2 47.4% 11.2%",
+  primaryForeground: "210 40% 98%",
+  secondary: "210 40% 96.1%",
+  secondaryForeground: "222.2 47.4% 11.2%",
+  muted: "210 40% 96.1%",
+  mutedForeground: "215.4 16.3% 46.9%",
+  accent: "210 40% 96.1%",
+  accentForeground: "222.2 47.4% 11.2%",
+  destructive: "0 84.2% 60.2%",
+  destructiveForeground: "210 40% 98%",
+  border: "214.3 31.8% 91.4%",
+  input: "214.3 31.8% 91.4%",
+  ring: "222.2 84% 4.9%",
+};
+
+const defaultFonts: ThemeFonts = {
+  sans: ["Inter", "sans-serif"],
+  serif: ["Georgia", "serif"],
+  mono: ["Menlo", "monospace"],
+};
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
+  type: z.enum(["default", "custom"]).default("custom"),
+  is_active: z.boolean().default(false),
   colors: z.object({
     background: z.string(),
     foreground: z.string(),
@@ -42,7 +72,6 @@ const formSchema = z.object({
     serif: z.array(z.string()),
     mono: z.array(z.string()),
   }),
-  is_active: z.boolean().optional(),
 });
 
 interface ThemeFormProps {
@@ -56,42 +85,19 @@ const ThemeForm = ({ open, onOpenChange, selectedTheme, onClose }: ThemeFormProp
   const queryClient = useQueryClient();
   const [isLoading, setIsLoading] = useState(false);
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<ThemeFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      colors: {
-        background: "0 0% 100%",
-        foreground: "222.2 84% 4.9%",
-        card: "0 0% 100%",
-        cardForeground: "222.2 84% 4.9%",
-        popover: "0 0% 100%",
-        popoverForeground: "222.2 84% 4.9%",
-        primary: "222.2 47.4% 11.2%",
-        primaryForeground: "210 40% 98%",
-        secondary: "210 40% 96.1%",
-        secondaryForeground: "222.2 47.4% 11.2%",
-        muted: "210 40% 96.1%",
-        mutedForeground: "215.4 16.3% 46.9%",
-        accent: "210 40% 96.1%",
-        accentForeground: "222.2 47.4% 11.2%",
-        destructive: "0 84.2% 60.2%",
-        destructiveForeground: "210 40% 98%",
-        border: "214.3 31.8% 91.4%",
-        input: "214.3 31.8% 91.4%",
-        ring: "222.2 84% 4.9%",
-      },
-      fonts: {
-        sans: ["Inter", "sans-serif"],
-        serif: ["Georgia", "serif"],
-        mono: ["Menlo", "monospace"],
-      },
-      is_active: false,
+      name: selectedTheme?.name ?? "",
+      type: "custom",
+      colors: selectedTheme?.colors ?? defaultColors,
+      fonts: selectedTheme?.fonts ?? defaultFonts,
+      is_active: selectedTheme?.is_active ?? false,
     },
   });
 
   const mutation = useMutation({
-    mutationFn: async (values: z.infer<typeof formSchema>) => {
+    mutationFn: async (values: ThemeFormData) => {
       setIsLoading(true);
       try {
         if (selectedTheme) {
@@ -99,13 +105,9 @@ const ThemeForm = ({ open, onOpenChange, selectedTheme, onClose }: ThemeFormProp
             .from("themes")
             .update(values)
             .eq("id", selectedTheme.id);
-
           if (error) throw error;
         } else {
-          const { error } = await supabase
-            .from("themes")
-            .insert([{ ...values, type: "custom" }]);
-
+          const { error } = await supabase.from("themes").insert([values]);
           if (error) throw error;
         }
       } finally {
@@ -123,10 +125,6 @@ const ThemeForm = ({ open, onOpenChange, selectedTheme, onClose }: ThemeFormProp
     },
   });
 
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    mutation.mutate(values);
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -135,16 +133,14 @@ const ThemeForm = ({ open, onOpenChange, selectedTheme, onClose }: ThemeFormProp
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit((values) => mutation.mutate(values))} className="space-y-6">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
+                  <Input {...field} />
                   <FormMessage />
                 </FormItem>
               )}
@@ -156,12 +152,7 @@ const ThemeForm = ({ open, onOpenChange, selectedTheme, onClose }: ThemeFormProp
               render={({ field }) => (
                 <FormItem className="flex items-center justify-between">
                   <FormLabel>Active</FormLabel>
-                  <FormControl>
-                    <Switch
-                      checked={field.value}
-                      onCheckedChange={field.onChange}
-                    />
-                  </FormControl>
+                  <Switch checked={field.value} onCheckedChange={field.onChange} />
                   <FormMessage />
                 </FormItem>
               )}
@@ -170,22 +161,12 @@ const ThemeForm = ({ open, onOpenChange, selectedTheme, onClose }: ThemeFormProp
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Colors</h3>
               <div className="grid grid-cols-2 gap-4">
-                {Object.keys(form.getValues().colors).map((colorKey) => (
-                  <FormField
-                    key={colorKey}
+                {Object.keys(defaultColors).map((key) => (
+                  <ColorField
+                    key={key}
                     control={form.control}
-                    name={`colors.${colorKey}`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="capitalize">
-                          {colorKey.replace(/([A-Z])/g, " $1").trim()}
-                        </FormLabel>
-                        <FormControl>
-                          <ColorPicker value={field.value} onChange={field.onChange} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    colorKey={key as keyof ThemeColors}
+                    label={key.replace(/([A-Z])/g, " $1").trim()}
                   />
                 ))}
               </div>
@@ -194,20 +175,12 @@ const ThemeForm = ({ open, onOpenChange, selectedTheme, onClose }: ThemeFormProp
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Fonts</h3>
               <div className="space-y-4">
-                {Object.keys(form.getValues().fonts).map((fontKey) => (
-                  <FormField
-                    key={fontKey}
+                {Object.keys(defaultFonts).map((key) => (
+                  <FontField
+                    key={key}
                     control={form.control}
-                    name={`fonts.${fontKey}`}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="capitalize">{fontKey}</FormLabel>
-                        <FormControl>
-                          <FontPicker value={field.value} onChange={field.onChange} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    fontKey={key as keyof ThemeFonts}
+                    label={key}
                   />
                 ))}
               </div>

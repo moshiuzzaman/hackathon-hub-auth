@@ -1,55 +1,67 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus, Minus } from "lucide-react";
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import type { Control } from "react-hook-form";
+import type { ThemeFormData } from "../types";
 
-interface FontPickerProps {
-  value: string[];
-  onChange: (value: string[]) => void;
+interface FontFieldProps {
+  control: Control<ThemeFormData>;
+  fontKey: keyof ThemeFormData["fonts"];
+  label: string;
 }
 
-export const FontPicker = ({ value, onChange }: FontPickerProps) => {
-  const handleAdd = () => {
-    onChange([...value, ""]);
-  };
-
-  const handleRemove = (index: number) => {
-    onChange(value.filter((_, i) => i !== index));
-  };
-
-  const handleChange = (index: number, newValue: string) => {
-    onChange(value.map((v, i) => (i === index ? newValue : v)));
-  };
-
+export const FontField = ({ control, fontKey, label }: FontFieldProps) => {
   return (
-    <div className="space-y-2">
-      {value.map((font, index) => (
-        <div key={index} className="flex gap-2">
-          <Input
-            value={font}
-            onChange={(e) => handleChange(index, e.target.value)}
-            className="flex-1"
-          />
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={() => handleRemove(index)}
-            disabled={value.length <= 1}
-          >
-            <Minus className="h-4 w-4" />
-          </Button>
-        </div>
-      ))}
-      <Button
-        type="button"
-        variant="outline"
-        size="sm"
-        onClick={handleAdd}
-        className="w-full"
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        Add Font
-      </Button>
-    </div>
+    <FormField
+      control={control}
+      name={`fonts.${fontKey}`}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel className="capitalize">{label}</FormLabel>
+          <div className="space-y-2">
+            {field.value.map((font: string, index: number) => (
+              <div key={index} className="flex gap-2">
+                <FormControl>
+                  <Input
+                    value={font}
+                    onChange={(e) => {
+                      const newValue = [...field.value];
+                      newValue[index] = e.target.value;
+                      field.onChange(newValue);
+                    }}
+                  />
+                </FormControl>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    const newValue = field.value.filter((_, i) => i !== index);
+                    field.onChange(newValue);
+                  }}
+                  disabled={field.value.length <= 1}
+                >
+                  <Minus className="h-4 w-4" />
+                </Button>
+              </div>
+            ))}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                field.onChange([...field.value, ""]);
+              }}
+              className="w-full"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Font
+            </Button>
+          </div>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
   );
 };
