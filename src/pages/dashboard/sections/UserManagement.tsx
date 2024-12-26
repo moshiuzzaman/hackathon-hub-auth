@@ -23,9 +23,8 @@ import { toast } from "sonner";
 
 type UserProfile = {
   id: string;
-  email: string;
-  role: string;
   full_name: string | null;
+  role: string;
   created_at: string;
 };
 
@@ -40,29 +39,17 @@ const UserManagement = () => {
         .from("profiles")
         .select("*");
 
-      if (error) throw error;
+      if (error) {
+        toast.error("Failed to fetch users");
+        throw error;
+      }
 
-      // Fetch emails from auth.users (this requires admin access)
-      const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
-      
-      if (authError) throw authError;
-
-      // Combine profile and auth user data
-      const combinedData = profiles.map(profile => {
-        const authUser = authUsers.users.find(user => user.id === profile.id);
-        return {
-          ...profile,
-          email: authUser?.email || "N/A",
-        };
-      });
-
-      return combinedData as UserProfile[];
+      return profiles as UserProfile[];
     },
   });
 
   const filteredUsers = users?.filter(user => {
     const matchesSearch = searchTerm === "" || 
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (user.full_name && user.full_name.toLowerCase().includes(searchTerm.toLowerCase()));
     
     const matchesRole = !selectedRole || user.role === selectedRole;
@@ -78,6 +65,8 @@ const UserManagement = () => {
     return <div>Loading users...</div>;
   }
 
+  const userRoles = ["admin", "organizer", "moderator", "mentor", "participant"];
+
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -91,17 +80,20 @@ const UserManagement = () => {
               className="pl-9"
             />
           </div>
-          <Select value={selectedRole || ""} onValueChange={setSelectedRole}>
+          <Select 
+            value={selectedRole || undefined} 
+            onValueChange={setSelectedRole}
+          >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by role" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All roles</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
-              <SelectItem value="organizer">Organizer</SelectItem>
-              <SelectItem value="moderator">Moderator</SelectItem>
-              <SelectItem value="mentor">Mentor</SelectItem>
-              <SelectItem value="participant">Participant</SelectItem>
+              <SelectItem value="all">All roles</SelectItem>
+              {userRoles.map((role) => (
+                <SelectItem key={role} value={role}>
+                  {role.charAt(0).toUpperCase() + role.slice(1)}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -116,7 +108,6 @@ const UserManagement = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
               <TableHead>Role</TableHead>
               <TableHead>Created At</TableHead>
               <TableHead>Actions</TableHead>
@@ -126,7 +117,6 @@ const UserManagement = () => {
             {filteredUsers?.map((user) => (
               <TableRow key={user.id}>
                 <TableCell>{user.full_name || "N/A"}</TableCell>
-                <TableCell>{user.email}</TableCell>
                 <TableCell className="capitalize">{user.role}</TableCell>
                 <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
                 <TableCell>
