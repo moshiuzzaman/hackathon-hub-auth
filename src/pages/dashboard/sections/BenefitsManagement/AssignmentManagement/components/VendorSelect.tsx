@@ -16,7 +16,7 @@ interface VendorSelectProps {
   onVendorSelect: (vendorId: string) => void;
 }
 
-export const VendorSelect = ({ form, vendors, onVendorSelect }: VendorSelectProps) => {
+export const VendorSelect = ({ form, vendors = [], onVendorSelect }: VendorSelectProps) => {
   return (
     <FormField
       control={form.control}

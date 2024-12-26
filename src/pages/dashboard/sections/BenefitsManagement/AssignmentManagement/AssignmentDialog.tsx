@@ -35,7 +35,7 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
     },
   });
 
-  const { data: users = [] } = useQuery({
+  const { data: users = [], isLoading: isLoadingUsers } = useQuery({
     queryKey: ["mentors"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -47,7 +47,7 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
     },
   });
 
-  const { data: vendors = [] } = useQuery({
+  const { data: vendors = [], isLoading: isLoadingVendors } = useQuery({
     queryKey: ["vendors"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -59,7 +59,7 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
     },
   });
 
-  const { data: unassignedBenefits = [] } = useQuery({
+  const { data: unassignedBenefits = [], isLoading: isLoadingBenefits } = useQuery({
     queryKey: ["unassigned-benefits", selectedVendor],
     enabled: !!selectedVendor,
     queryFn: async () => {
@@ -188,6 +188,10 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
     }
   };
 
+  if (isLoadingUsers || isLoadingVendors) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
@@ -215,7 +219,7 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
                   onUserSelect={handleUserSelect}
                 />
 
-                {selectedVendor && (
+                {selectedVendor && !isLoadingBenefits && (
                   <div className="text-sm text-muted-foreground">
                     Available benefits: {unassignedBenefits.length}
                   </div>
@@ -247,7 +251,7 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
                 onVendorSelect={handleVendorSelect}
               />
 
-              {selectedVendor && (
+              {selectedVendor && !isLoadingBenefits && (
                 <div className="text-sm text-muted-foreground">
                   Available benefits: {unassignedBenefits.length}
                 </div>

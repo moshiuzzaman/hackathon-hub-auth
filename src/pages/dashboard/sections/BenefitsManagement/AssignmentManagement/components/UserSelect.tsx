@@ -17,12 +17,12 @@ interface UserSelectProps {
   onUserSelect: (userId: string) => void;
 }
 
-export const UserSelect = ({ form, users, selectedUsers, onUserSelect }: UserSelectProps) => {
+export const UserSelect = ({ form, users = [], selectedUsers = [], onUserSelect }: UserSelectProps) => {
   return (
     <FormField
       control={form.control}
       name="userIds"
-      render={({ field }) => (
+      render={() => (
         <FormItem>
           <FormLabel>Select Users</FormLabel>
           <FormControl>
