@@ -14,8 +14,8 @@ import {
 } from "@/components/ui/dialog";
 import { UserTable } from "./UserTable";
 import { UserFilters } from "./UserFilters";
-import { CreateUserForm, UserFormValues } from "./CreateUserForm";
-import { EditUserForm } from "./EditUserForm";
+import { CreateUserForm } from "./CreateUserForm";
+import { EditUserDialog } from "./EditUserDialog";
 import { UserProfile, UserRole, EditUserFormValues } from "./types";
 
 const UserManagement = () => {
@@ -48,29 +48,6 @@ const UserManagement = () => {
     
     return matchesSearch && matchesRole;
   });
-
-  const handleCreateUser = async (data: UserFormValues) => {
-    try {
-      const { error: signUpError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          data: {
-            full_name: data.full_name,
-            role: data.role,
-          },
-        },
-      });
-
-      if (signUpError) throw signUpError;
-
-      toast.success("User created successfully");
-      setIsCreateModalOpen(false);
-      refetch();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to create user");
-    }
-  };
 
   const handleEditUser = async (data: EditUserFormValues) => {
     if (!editingUser) return;
@@ -146,23 +123,11 @@ const UserManagement = () => {
         </Dialog>
       </div>
 
-      <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
-            <DialogDescription>
-              Update the user's information.
-            </DialogDescription>
-          </DialogHeader>
-          {editingUser && (
-            <EditUserForm
-              user={editingUser}
-              onSubmit={handleEditUser}
-              onCancel={() => setEditingUser(null)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      <EditUserDialog
+        user={editingUser}
+        onClose={() => setEditingUser(null)}
+        onSubmit={handleEditUser}
+      />
 
       <UserTable
         users={filteredUsers || []}
