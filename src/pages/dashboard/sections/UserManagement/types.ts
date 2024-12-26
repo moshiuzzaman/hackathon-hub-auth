@@ -12,3 +12,17 @@ export interface Profile {
   mentor_approval_date: string | null;
   max_teams: number | null;
 }
+
+export type UserRole = 'admin' | 'organizer' | 'moderator' | 'mentor' | 'participant';
+
+export interface UserProfile {
+  id: string;
+  full_name: string | null;
+  role: UserRole;
+  created_at: string;
+}
+
+export interface EditUserFormValues {
+  full_name: string;
+  role: UserRole;
+}
