@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Loader2, UserMinus } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import type { TeamWithDetails } from "./types";
 
 const TeamLobby = () => {
@@ -109,7 +109,10 @@ const TeamLobby = () => {
               </div>
               <Button
                 className="w-full"
-                onClick={() => joinTeam.mutate(team.id)}
+                onClick={() => {
+                  setSelectedTeamId(team.id);
+                  joinTeam.mutate(team.id);
+                }}
                 disabled={joinTeam.isPending && selectedTeamId === team.id}
               >
                 {joinTeam.isPending && selectedTeamId === team.id ? (
@@ -123,6 +126,6 @@ const TeamLobby = () => {
       </div>
     </div>
   );
-});
+};
 
 export default TeamLobby;
