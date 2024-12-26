@@ -14,7 +14,7 @@ const EventGallery = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("event_gallery")
-        .select("*, events(title)")
+        .select("*")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
@@ -31,7 +31,7 @@ const EventGallery = () => {
         <h2 className="text-2xl font-bold">Event Gallery</h2>
         <Button onClick={() => setIsUploadModalOpen(true)}>
           <Plus className="mr-2" />
-          Upload Image
+          Add Image
         </Button>
       </div>
 
