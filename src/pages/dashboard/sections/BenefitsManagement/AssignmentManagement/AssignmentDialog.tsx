@@ -10,7 +10,7 @@ import * as z from "zod";
 import { toast } from "sonner";
 import { VendorSelect } from "./components/VendorSelect";
 import { UserSelect } from "./components/UserSelect";
-import { User, Vendor, Benefit } from "./types";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const formSchema = z.object({
   userIds: z.array(z.string()).min(1, "Select at least one user"),
@@ -35,19 +35,19 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
     },
   });
 
-  const { data: users = [] } = useQuery<User[]>({
+  const { data: users = [] } = useQuery({
     queryKey: ["mentors"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, full_name")
-        .eq("role", "mentor");
+        .select("id, full_name, role")
+        .in("role", ["mentor", "participant"]);
       if (error) throw error;
       return data || [];
     },
   });
 
-  const { data: vendors = [] } = useQuery<Vendor[]>({
+  const { data: vendors = [] } = useQuery({
     queryKey: ["vendors"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -59,7 +59,7 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
     },
   });
 
-  const { data: unassignedBenefits = [] } = useQuery<Benefit[]>({
+  const { data: unassignedBenefits = [] } = useQuery({
     queryKey: ["unassigned-benefits", selectedVendor],
     enabled: !!selectedVendor,
     queryFn: async () => {
@@ -84,6 +84,67 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
 
   const handleVendorSelect = (vendorId: string) => {
     setSelectedVendor(vendorId);
+    form.setValue("vendorId", vendorId);
+  };
+
+  const handleAutoAssign = async (userRole: "mentor" | "participant") => {
+    try {
+      if (!selectedVendor) {
+        toast.error("Please select a vendor first");
+        return;
+      }
+
+      // Get users without benefits from this vendor
+      const { data: usersWithoutBenefits, error: usersError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("role", userRole)
+        .not("id", "in", (
+          await supabase
+            .from("benefit_assignments")
+            .select("user_id")
+            .eq("benefit:benefits(vendor_id)", selectedVendor)
+        ).data?.map(a => a.user_id) || []);
+
+      if (usersError) throw usersError;
+
+      if (!usersWithoutBenefits?.length) {
+        toast.info("All users already have benefits from this vendor");
+        return;
+      }
+
+      if (usersWithoutBenefits.length > unassignedBenefits.length) {
+        toast.error("Not enough benefits available for all users");
+        return;
+      }
+
+      const assignments = usersWithoutBenefits.map((user, index) => ({
+        user_id: user.id,
+        benefit_id: unassignedBenefits[index].id,
+      }));
+
+      const { error: assignmentError } = await supabase
+        .from("benefit_assignments")
+        .insert(assignments);
+
+      if (assignmentError) throw assignmentError;
+
+      const { error: updateError } = await supabase
+        .from("benefits")
+        .update({ is_assigned: true })
+        .in("id", assignments.map(a => a.benefit_id));
+
+      if (updateError) throw updateError;
+
+      toast.success(`Benefits auto-assigned to ${assignments.length} ${userRole}s`);
+      onSuccess();
+      onOpenChange(false);
+      setSelectedUsers([]);
+      setSelectedVendor("");
+      form.reset();
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   const onSubmit = async () => {
@@ -109,11 +170,10 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
 
       if (assignmentError) throw assignmentError;
 
-      const benefitIds = assignments.map(a => a.benefit_id);
       const { error: updateError } = await supabase
         .from("benefits")
         .update({ is_assigned: true })
-        .in("id", benefitIds);
+        .in("id", assignments.map(a => a.benefit_id));
 
       if (updateError) throw updateError;
 
@@ -134,44 +194,89 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
         <DialogHeader>
           <DialogTitle>Assign Benefits</DialogTitle>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <VendorSelect
-              form={form}
-              vendors={vendors}
-              onVendorSelect={handleVendorSelect}
-            />
+        <Tabs defaultValue="manual">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="manual">Manual Assignment</TabsTrigger>
+            <TabsTrigger value="auto">Auto Assignment</TabsTrigger>
+          </TabsList>
+          <TabsContent value="manual">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                <VendorSelect
+                  form={form}
+                  vendors={vendors}
+                  onVendorSelect={handleVendorSelect}
+                />
 
-            <UserSelect
-              form={form}
-              users={users}
-              selectedUsers={selectedUsers}
-              onUserSelect={handleUserSelect}
-            />
+                <UserSelect
+                  form={form}
+                  users={users}
+                  selectedUsers={selectedUsers}
+                  onUserSelect={handleUserSelect}
+                />
 
-            {selectedVendor && (
-              <div className="text-sm text-muted-foreground">
-                Available benefits: {unassignedBenefits.length}
+                {selectedVendor && (
+                  <div className="text-sm text-muted-foreground">
+                    Available benefits: {unassignedBenefits.length}
+                  </div>
+                )}
+
+                <div className="flex justify-end space-x-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => onOpenChange(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={!selectedVendor || selectedUsers.length === 0}
+                  >
+                    Assign Benefits
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </TabsContent>
+          <TabsContent value="auto">
+            <div className="space-y-6">
+              <VendorSelect
+                form={form}
+                vendors={vendors}
+                onVendorSelect={handleVendorSelect}
+              />
+
+              {selectedVendor && (
+                <div className="text-sm text-muted-foreground">
+                  Available benefits: {unassignedBenefits.length}
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => onOpenChange(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={() => handleAutoAssign("participant")}
+                  disabled={!selectedVendor}
+                >
+                  Auto-assign to Participants
+                </Button>
+                <Button
+                  onClick={() => handleAutoAssign("mentor")}
+                  disabled={!selectedVendor}
+                >
+                  Auto-assign to Mentors
+                </Button>
               </div>
-            )}
-
-            <div className="flex justify-end space-x-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                disabled={!selectedVendor || selectedUsers.length === 0}
-              >
-                Assign Benefits
-              </Button>
             </div>
-          </form>
-        </Form>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
