@@ -11,12 +11,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import AssignmentForm from "./AssignmentForm";
+import AssignmentDialog from "./AssignmentDialog";
 
 const AssignmentManagement = () => {
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
 
-  const { data: assignments, isLoading, refetch } = useQuery({
+  const { data: assignments = [], isLoading, refetch } = useQuery({
     queryKey: ["benefit-assignments"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -32,7 +32,7 @@ const AssignmentManagement = () => {
         `)
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return data;
+      return data || [];
     },
   });
 
@@ -62,7 +62,7 @@ const AssignmentManagement = () => {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {assignments?.map((assignment) => (
+          {assignments.map((assignment) => (
             <TableRow key={assignment.id}>
               <TableCell>{assignment.user?.full_name}</TableCell>
               <TableCell>{assignment.benefit?.provider_name}</TableCell>
@@ -95,7 +95,7 @@ const AssignmentManagement = () => {
         </TableBody>
       </Table>
 
-      <AssignmentForm
+      <AssignmentDialog
         open={isAssignModalOpen}
         onOpenChange={setIsAssignModalOpen}
         onSuccess={() => {

@@ -13,11 +13,9 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { BenefitForm } from "./BenefitForm";
-import AssignmentDialog from "../AssignmentManagement/AssignmentDialog";
 
 const BenefitsManagement = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [editingBenefit, setEditingBenefit] = useState<any>(null);
 
   const { data: benefits, isLoading, refetch } = useQuery({
@@ -57,16 +55,10 @@ const BenefitsManagement = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Benefits Management</h2>
-        <div className="space-x-2">
-          <Button onClick={() => setIsAssignModalOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Assign Benefits
-          </Button>
-          <Button onClick={() => setIsAddModalOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Benefit
-          </Button>
-        </div>
+        <Button onClick={() => setIsAddModalOpen(true)}>
+          <Plus className="mr-2 h-4 w-4" />
+          Add Benefit
+        </Button>
       </div>
 
       <Table>
@@ -137,14 +129,6 @@ const BenefitsManagement = () => {
           }
         }}
         initialData={editingBenefit}
-        onSuccess={() => {
-          refetch();
-        }}
-      />
-
-      <AssignmentDialog
-        open={isAssignModalOpen}
-        onOpenChange={setIsAssignModalOpen}
         onSuccess={() => {
           refetch();
         }}
