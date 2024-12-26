@@ -30,13 +30,12 @@ const TeamManagement = () => {
               id,
               name
             ),
-            mentor:mentor_id (
-              id,
+            mentor:profiles!teams_mentor_id_fkey (
               full_name
             ),
             members:team_members (
               id,
-              profile:user_id (
+              profile:profiles!team_members_user_id_fkey (
                 id,
                 full_name
               )
@@ -87,7 +86,6 @@ const TeamManagement = () => {
     },
   });
 
-  // Join team mutation
   const joinTeam = useMutation({
     mutationFn: async (joinCode: string) => {
       const { data: team, error: teamError } = await supabase
