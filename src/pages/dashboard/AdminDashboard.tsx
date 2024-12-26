@@ -2,6 +2,9 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { Users, Settings, Calendar, Newspaper } from "lucide-react";
+import { toast } from "sonner";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -20,7 +23,8 @@ const AdminDashboard = () => {
         .eq("id", session.user.id)
         .single();
 
-      if (!profile || !["admin", "moderator"].includes(profile.role)) {
+      if (!profile || profile.role !== "admin") {
+        toast.error("Access denied. Admin privileges required.");
         navigate("/login");
       }
     };
@@ -33,21 +37,66 @@ const AdminDashboard = () => {
     navigate("/login");
   };
 
+  const navigationItems = [
+    { icon: Users, label: "User Management", active: true },
+    { icon: Settings, label: "Platform Settings", active: false },
+    { icon: Calendar, label: "Event Management", active: false },
+    { icon: Newspaper, label: "News Management", active: false },
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <button
-            onClick={handleSignOut}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
-          >
-            Sign Out
-          </button>
+    <div className="min-h-screen bg-background">
+      {/* Sidebar */}
+      <div className="fixed inset-y-0 left-0 w-64 bg-sidebar border-r border-sidebar-border">
+        <div className="flex flex-col h-full">
+          <div className="p-6">
+            <h1 className="text-2xl font-bold text-sidebar-foreground">Admin Dashboard</h1>
+          </div>
+          
+          <nav className="flex-1 p-4 space-y-2">
+            {navigationItems.map((item) => (
+              <button
+                key={item.label}
+                className={`flex items-center w-full px-4 py-2 text-sm rounded-md transition-colors
+                  ${item.active 
+                    ? "bg-sidebar-accent text-sidebar-accent-foreground" 
+                    : "text-sidebar-foreground hover:bg-sidebar-accent/50"
+                  }`}
+              >
+                <item.icon className="w-4 h-4 mr-3" />
+                {item.label}
+              </button>
+            ))}
+          </nav>
+
+          <div className="p-4 border-t border-sidebar-border">
+            <Button
+              variant="destructive"
+              className="w-full"
+              onClick={handleSignOut}
+            >
+              Sign Out
+            </Button>
+          </div>
         </div>
-        <div className="bg-white rounded-lg shadow p-6">
-          <p className="text-gray-600">Welcome to the admin dashboard!</p>
-        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="pl-64">
+        <main className="container p-6">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-3xl font-bold tracking-tight">User Management</h2>
+            </div>
+
+            {/* Content area - will be replaced with actual features */}
+            <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+              <p className="text-muted-foreground">
+                Select a feature from the sidebar to manage users, platform settings, events, or news.
+              </p>
+            </div>
+          </div>
+        </main>
       </div>
     </div>
   );
