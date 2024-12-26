@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Plus, Upload, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -13,11 +13,11 @@ import {
 } from "@/components/ui/table";
 import { toast } from "sonner";
 import { BenefitForm } from "./BenefitForm";
-import BulkUploadForm from "./BulkUploadForm";
+import AssignmentDialog from "../AssignmentManagement/AssignmentDialog";
 
 const BenefitsManagement = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isBulkUploadOpen, setIsBulkUploadOpen] = useState(false);
+  const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
   const [editingBenefit, setEditingBenefit] = useState<any>(null);
 
   const { data: benefits, isLoading, refetch } = useQuery({
@@ -58,9 +58,9 @@ const BenefitsManagement = () => {
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Benefits Management</h2>
         <div className="space-x-2">
-          <Button onClick={() => setIsBulkUploadOpen(true)}>
-            <Upload className="mr-2 h-4 w-4" />
-            Bulk Upload
+          <Button onClick={() => setIsAssignModalOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Assign Benefits
           </Button>
           <Button onClick={() => setIsAddModalOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
@@ -142,9 +142,9 @@ const BenefitsManagement = () => {
         }}
       />
 
-      <BulkUploadForm
-        open={isBulkUploadOpen}
-        onOpenChange={setIsBulkUploadOpen}
+      <AssignmentDialog
+        open={isAssignModalOpen}
+        onOpenChange={setIsAssignModalOpen}
         onSuccess={() => {
           refetch();
         }}
