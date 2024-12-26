@@ -18,6 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { CreateUserFormValues, UserRole } from "./types";
 
 const userFormSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -26,15 +27,13 @@ const userFormSchema = z.object({
   role: z.enum(["admin", "organizer", "moderator", "mentor", "participant"]),
 });
 
-export type UserFormValues = z.infer<typeof userFormSchema>;
-
 interface CreateUserFormProps {
-  onSubmit: (data: UserFormValues) => Promise<void>;
+  onSubmit: (data: CreateUserFormValues) => Promise<void>;
   onCancel: () => void;
 }
 
 export const CreateUserForm = ({ onSubmit, onCancel }: CreateUserFormProps) => {
-  const form = useForm<UserFormValues>({
+  const form = useForm<CreateUserFormValues>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
       email: "",
@@ -44,7 +43,7 @@ export const CreateUserForm = ({ onSubmit, onCancel }: CreateUserFormProps) => {
     },
   });
 
-  const userRoles = ["admin", "organizer", "moderator", "mentor", "participant"];
+  const userRoles: UserRole[] = ["admin", "organizer", "moderator", "mentor", "participant"];
 
   return (
     <Form {...form}>

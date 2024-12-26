@@ -26,3 +26,10 @@ export interface EditUserFormValues {
   full_name: string;
   role: UserRole;
 }
+
+export interface CreateUserFormValues {
+  email: string;
+  password: string;
+  full_name: string;
+  role: UserRole;
+}

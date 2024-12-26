@@ -4,16 +4,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { UserTable } from "./UserTable";
 import { UserFilters } from "./UserFilters";
 import { CreateUserForm } from "./CreateUserForm";
 import { EditUserDialog } from "./EditUserDialog";
-import { UserProfile, EditUserFormValues } from "./types";
+import { UserProfile, EditUserFormValues, CreateUserFormValues, UserRole } from "./types";
 
 const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [selectedRole, setSelectedRole] = useState<UserRole | "all" | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
 
@@ -42,7 +42,7 @@ const UserManagement = () => {
     return matchesSearch && matchesRole;
   });
 
-  const handleCreateUser = async (data: UserFormValues) => {
+  const handleCreateUser = async (data: CreateUserFormValues) => {
     try {
       const { error: signUpError } = await supabase.auth.signUp({
         email: data.email,
