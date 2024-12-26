@@ -24,7 +24,7 @@ const DashboardContent = ({ userId }: DashboardContentProps) => {
 
       if (events) setUpcomingEvents(events);
 
-      // Fetch team information
+      // Fetch team information using maybeSingle() instead of single()
       const { data: teamMember } = await supabase
         .from("team_members")
         .select(`
@@ -38,7 +38,7 @@ const DashboardContent = ({ userId }: DashboardContentProps) => {
           )
         `)
         .eq("user_id", userId)
-        .single();
+        .maybeSingle();
 
       if (teamMember) setTeamInfo(teamMember.teams);
     };
