@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import ProfileSetup from "./sections/ParticipantDashboard/ProfileSetup";
+import DashboardContent from "./sections/ParticipantDashboard/DashboardContent";
 import { Loader2 } from "lucide-react";
 
 const ParticipantDashboard = () => {
@@ -63,10 +64,7 @@ const ParticipantDashboard = () => {
         {!isOnboarded ? (
           <ProfileSetup />
         ) : (
-          <div className="bg-card rounded-lg shadow-sm p-6 mt-6">
-            <p className="text-card-foreground">Welcome to your dashboard!</p>
-            {/* Add more dashboard content here */}
-          </div>
+          <DashboardContent userId={session.user.id} />
         )}
       </div>
     </div>
