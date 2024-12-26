@@ -434,13 +434,16 @@ export type Database = {
         Row: {
           created_at: string
           full_name: string | null
+          github_org_invited: boolean | null
           github_username: string | null
           id: string
           linkedin_username: string | null
           max_teams: number | null
           mentor_approval_date: string | null
           mentor_status: string | null
+          onboarding_completed: boolean | null
           photo_url: string | null
+          preferred_stack_id: string | null
           rejection_reason: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
@@ -448,13 +451,16 @@ export type Database = {
         Insert: {
           created_at?: string
           full_name?: string | null
+          github_org_invited?: boolean | null
           github_username?: string | null
           id: string
           linkedin_username?: string | null
           max_teams?: number | null
           mentor_approval_date?: string | null
           mentor_status?: string | null
+          onboarding_completed?: boolean | null
           photo_url?: string | null
+          preferred_stack_id?: string | null
           rejection_reason?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
@@ -462,18 +468,129 @@ export type Database = {
         Update: {
           created_at?: string
           full_name?: string | null
+          github_org_invited?: boolean | null
           github_username?: string | null
           id?: string
           linkedin_username?: string | null
           max_teams?: number | null
           mentor_approval_date?: string | null
           mentor_status?: string | null
+          onboarding_completed?: boolean | null
           photo_url?: string | null
+          preferred_stack_id?: string | null
           rejection_reason?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_preferred_stack_id_fkey"
+            columns: ["preferred_stack_id"]
+            isOneToOne: false
+            referencedRelation: "technology_stacks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          id: string
+          joined_at: string
+          team_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          team_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          team_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string
+          github_repo_url: string | null
+          id: string
+          is_ready: boolean | null
+          join_code: string
+          leader_id: string | null
+          logo_url: string | null
+          mentor_id: string | null
+          name: string
+          stack_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          github_repo_url?: string | null
+          id?: string
+          is_ready?: boolean | null
+          join_code: string
+          leader_id?: string | null
+          logo_url?: string | null
+          mentor_id?: string | null
+          name: string
+          stack_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          github_repo_url?: string | null
+          id?: string
+          is_ready?: boolean | null
+          join_code?: string
+          leader_id?: string | null
+          logo_url?: string | null
+          mentor_id?: string | null
+          name?: string
+          stack_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_leader_id_fkey"
+            columns: ["leader_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teams_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teams_stack_id_fkey"
+            columns: ["stack_id"]
+            isOneToOne: false
+            referencedRelation: "technology_stacks"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       technology_stacks: {
         Row: {
@@ -581,6 +698,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_team_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_next_version: {
         Args: {
           doc_type: Database["public"]["Enums"]["legal_document_type"]
