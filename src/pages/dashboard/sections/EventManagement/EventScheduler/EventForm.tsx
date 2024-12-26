@@ -96,6 +96,10 @@ const EventForm = ({ open, onOpenChange, selectedDate, event }: EventFormProps) 
     },
   });
 
+  const onSubmit = (values: FormData) => {
+    mutation.mutate(values);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">

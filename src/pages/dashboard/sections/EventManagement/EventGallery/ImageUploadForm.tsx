@@ -30,10 +30,15 @@ const formSchema = z.object({
   description: z.string().optional(),
   tags: z.string()
     .optional()
-    .transform((str) => str ? str.split(",").map((s) => s.trim()) : []) as z.ZodType<string[]>,
+    .transform((str) => (str ? str.split(",").map((s) => s.trim()) : [])),
 });
 
-type FormData = z.infer<typeof formSchema>;
+type FormData = {
+  file: File;
+  event_id?: string;
+  description?: string;
+  tags: string[];
+};
 
 interface ImageUploadFormProps {
   open: boolean;
@@ -59,7 +64,7 @@ const ImageUploadForm = ({ open, onOpenChange }: ImageUploadFormProps) => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       description: "",
-      tags: "",
+      tags: [],
     },
   });
 
