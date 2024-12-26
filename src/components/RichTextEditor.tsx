@@ -1,6 +1,14 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
+import Link from '@tiptap/extension-link';
+import Image from '@tiptap/extension-image';
+import Table from '@tiptap/extension-table';
+import TableRow from '@tiptap/extension-table-row';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
+import TextStyle from '@tiptap/extension-text-style';
 import { Button } from './ui/button';
+import { Input } from './ui/input';
 import { 
   Bold, 
   Italic, 
@@ -9,9 +17,19 @@ import {
   Quote,
   Heading1,
   Heading2,
-  Heading3
+  Heading3,
+  Link as LinkIcon,
+  Image as ImageIcon,
+  Table as TableIcon,
+  Type
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { useState } from 'react';
 
 interface RichTextEditorProps {
   content: string;
@@ -41,13 +59,36 @@ const ToolbarButton = ({
   </Button>
 );
 
+const fontSizes = ['small', 'normal', 'large', 'huge'];
+
 export const RichTextEditor = ({ 
   content, 
   onChange,
   maxHeight = "400px" 
 }: RichTextEditorProps) => {
+  const [linkUrl, setLinkUrl] = useState('');
+  const [imageUrl, setImageUrl] = useState('');
+  const [linkPopoverOpen, setLinkPopoverOpen] = useState(false);
+  const [imagePopoverOpen, setImagePopoverOpen] = useState(false);
+
   const editor = useEditor({
-    extensions: [StarterKit],
+    extensions: [
+      StarterKit,
+      Link.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-blue-500 hover:underline',
+        },
+      }),
+      Image,
+      Table.configure({
+        resizable: true,
+      }),
+      TableRow,
+      TableCell,
+      TableHeader,
+      TextStyle,
+    ],
     content,
     onUpdate: ({ editor }) => {
       onChange(editor.getHTML());
@@ -57,6 +98,26 @@ export const RichTextEditor = ({
   if (!editor) {
     return null;
   }
+
+  const addLink = () => {
+    if (linkUrl) {
+      editor.chain().focus().setLink({ href: linkUrl }).run();
+      setLinkUrl('');
+      setLinkPopoverOpen(false);
+    }
+  };
+
+  const addImage = () => {
+    if (imageUrl) {
+      editor.chain().focus().setImage({ src: imageUrl }).run();
+      setImageUrl('');
+      setImagePopoverOpen(false);
+    }
+  };
+
+  const insertTable = () => {
+    editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+  };
 
   const toolbarItems = [
     { 
@@ -112,6 +173,85 @@ export const RichTextEditor = ({
             isActive={item.isActive}
           />
         ))}
+
+        <Popover open={linkPopoverOpen} onOpenChange={setLinkPopoverOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "hover:bg-secondary/50",
+                editor.isActive('link') && "bg-secondary"
+              )}
+            >
+              <LinkIcon className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Enter URL"
+                value={linkUrl}
+                onChange={(e) => setLinkUrl(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addLink()}
+              />
+              <Button onClick={addLink}>Add</Button>
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        <Popover open={imagePopoverOpen} onOpenChange={setImagePopoverOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="sm">
+              <ImageIcon className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-80">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Enter image URL"
+                value={imageUrl}
+                onChange={(e) => setImageUrl(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && addImage()}
+              />
+              <Button onClick={addImage}>Add</Button>
+            </div>
+          </PopoverContent>
+        </Popover>
+
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={insertTable}
+          className="hover:bg-secondary/50"
+        >
+          <TableIcon className="h-4 w-4" />
+        </Button>
+
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="sm">
+              <Type className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-40">
+            <div className="flex flex-col gap-1">
+              {fontSizes.map((size) => (
+                <Button
+                  key={size}
+                  variant="ghost"
+                  onClick={() => editor.chain().focus().setFontSize(size).run()}
+                  className={cn(
+                    "justify-start",
+                    editor.isActive({ fontSize: size }) && "bg-secondary"
+                  )}
+                >
+                  {size.charAt(0).toUpperCase() + size.slice(1)}
+                </Button>
+              ))}
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
       <div 
         className="overflow-y-auto"

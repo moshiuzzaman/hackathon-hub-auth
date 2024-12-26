@@ -2,15 +2,14 @@ import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
 import * as z from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Bold, Italic, List, ListOrdered } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { RichTextEditor } from "@/components/RichTextEditor";
 import { toast } from "sonner";
 import type { News, NewsFormData } from "./types";
 
@@ -31,53 +30,6 @@ interface NewsFormProps {
   onClose: () => void;
 }
 
-const MenuBar = ({ editor }: { editor: any }) => {
-  if (!editor) {
-    return null;
-  }
-
-  return (
-    <div className="flex gap-2 p-2 border-b">
-      <Button
-        variant="outline"
-        size="icon"
-        type="button"
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        className={editor.isActive('bold') ? 'bg-accent' : ''}
-      >
-        <Bold className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="outline"
-        size="icon"
-        type="button"
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={editor.isActive('italic') ? 'bg-accent' : ''}
-      >
-        <Italic className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="outline"
-        size="icon"
-        type="button"
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={editor.isActive('bulletList') ? 'bg-accent' : ''}
-      >
-        <List className="h-4 w-4" />
-      </Button>
-      <Button
-        variant="outline"
-        size="icon"
-        type="button"
-        onClick={() => editor.chain().focus().toggleOrderedList().run()}
-        className={editor.isActive('orderedList') ? 'bg-accent' : ''}
-      >
-        <ListOrdered className="h-4 w-4" />
-      </Button>
-    </div>
-  );
-};
-
 const NewsForm = ({ open, onOpenChange, selectedNews, onClose }: NewsFormProps) => {
   const queryClient = useQueryClient();
   const form = useForm<NewsFormData>({
@@ -90,19 +42,6 @@ const NewsForm = ({ open, onOpenChange, selectedNews, onClose }: NewsFormProps) 
         category: "",
       },
       published_at: null,
-    },
-  });
-
-  const editor = useEditor({
-    extensions: [StarterKit],
-    content: "",
-    onUpdate: ({ editor }) => {
-      form.setValue("content", editor.getHTML());
-    },
-    editorProps: {
-      attributes: {
-        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none',
-      },
     },
   });
 
@@ -131,12 +70,10 @@ const NewsForm = ({ open, onOpenChange, selectedNews, onClose }: NewsFormProps) 
         meta_info: parsedMetaInfo,
         published_at: selectedNews.published_at,
       });
-      editor?.commands.setContent(selectedNews.content);
     } else {
       form.reset();
-      editor?.commands.setContent("");
     }
-  }, [selectedNews, form, editor]);
+  }, [selectedNews, form]);
 
   const mutation = useMutation({
     mutationFn: async (values: NewsFormData) => {
@@ -172,7 +109,7 @@ const NewsForm = ({ open, onOpenChange, selectedNews, onClose }: NewsFormProps) 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{selectedNews ? "Edit News" : "Create News"}</DialogTitle>
         </DialogHeader>
@@ -193,18 +130,44 @@ const NewsForm = ({ open, onOpenChange, selectedNews, onClose }: NewsFormProps) 
               )}
             />
 
-            <FormItem>
-              <FormLabel>Content</FormLabel>
-              <FormControl>
-                <div className="border rounded-md overflow-hidden">
-                  <MenuBar editor={editor} />
-                  <div className="min-h-[200px] p-4">
-                    <EditorContent editor={editor} />
-                  </div>
-                </div>
-              </FormControl>
-              <FormMessage />
-            </FormItem>
+            <FormField
+              control={form.control}
+              name="published_at"
+              render={({ field }) => (
+                <FormItem className="flex items-center justify-between">
+                  <FormLabel>Published</FormLabel>
+                  <FormControl>
+                    <Switch
+                      checked={!!field.value}
+                      onCheckedChange={(checked) => {
+                        field.onChange(checked ? new Date().toISOString() : null);
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="content"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Content</FormLabel>
+                  <FormControl>
+                    <div className="h-[500px] overflow-hidden">
+                      <RichTextEditor
+                        content={field.value}
+                        onChange={field.onChange}
+                        maxHeight="450px"
+                      />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className="flex justify-end space-x-2">
               <Button variant="outline" type="button" onClick={onClose}>
