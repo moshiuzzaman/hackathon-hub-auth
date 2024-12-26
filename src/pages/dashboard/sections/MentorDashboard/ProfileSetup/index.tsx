@@ -25,6 +25,8 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
+type FormFields = keyof FormData;
+
 const ProfileSetup = ({ profile }: { profile: any }) => {
   const [progress, setProgress] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,7 +43,7 @@ const ProfileSetup = ({ profile }: { profile: any }) => {
 
   useEffect(() => {
     const calculateProgress = () => {
-      const fields = ["full_name", "photo_url", "linkedin_username", "github_username"];
+      const fields: FormFields[] = ["full_name", "photo_url", "linkedin_username", "github_username"];
       const filledFields = fields.filter(field => !!form.getValues(field));
       setProgress((filledFields.length / fields.length) * 100);
     };
