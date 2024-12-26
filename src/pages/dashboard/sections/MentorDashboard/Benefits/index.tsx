@@ -8,12 +8,12 @@ const Benefits = ({ profile }: { profile: any }) => {
     queryKey: ["mentor-benefits", profile.id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from("mentor_benefit_assignments")
+        .from("benefit_assignments")
         .select(`
           *,
-          benefit:mentor_benefits(*)
+          benefit:benefits(*)
         `)
-        .eq("mentor_id", profile.id);
+        .eq("user_id", profile.id);
       if (error) throw error;
       return data;
     },
@@ -22,7 +22,7 @@ const Benefits = ({ profile }: { profile: any }) => {
   const handleRedeem = async (assignmentId: string) => {
     try {
       const { error } = await supabase
-        .from("mentor_benefit_assignments")
+        .from("benefit_assignments")
         .update({
           is_redeemed: true,
           redeemed_at: new Date().toISOString(),

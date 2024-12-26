@@ -33,7 +33,13 @@ type FormData = z.infer<typeof formSchema>;
 interface VendorFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  vendor?: any;
+  vendor?: {
+    id: string;
+    name: string;
+    website: string;
+    icon: string;
+    redemption_instructions: string;
+  };
   onSuccess: () => void;
 }
 
@@ -53,14 +59,24 @@ const VendorForm = ({ open, onOpenChange, vendor, onSuccess }: VendorFormProps) 
       if (vendor) {
         const { error } = await supabase
           .from("vendors")
-          .update(values)
+          .update({
+            name: values.name,
+            website: values.website,
+            icon: values.icon,
+            redemption_instructions: values.redemption_instructions,
+          })
           .eq("id", vendor.id);
         if (error) throw error;
         toast.success("Vendor updated successfully");
       } else {
         const { error } = await supabase
           .from("vendors")
-          .insert([values]);
+          .insert([{
+            name: values.name,
+            website: values.website,
+            icon: values.icon,
+            redemption_instructions: values.redemption_instructions,
+          }]);
         if (error) throw error;
         toast.success("Vendor added successfully");
       }
