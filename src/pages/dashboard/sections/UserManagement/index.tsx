@@ -15,12 +15,14 @@ import {
 import { UserTable } from "./UserTable";
 import { UserFilters } from "./UserFilters";
 import { CreateUserForm, UserFormValues } from "./CreateUserForm";
+import { EditUserForm } from "./EditUserForm";
 import { UserProfile } from "./types";
 
 const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
 
   const { data: users, isLoading, refetch } = useQuery({
     queryKey: ["users"],
@@ -70,6 +72,29 @@ const UserManagement = () => {
     }
   };
 
+  const handleEditUser = async (data: { full_name: string; role: string }) => {
+    if (!editingUser) return;
+
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          full_name: data.full_name,
+          role: data.role,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("id", editingUser.id);
+
+      if (error) throw error;
+
+      toast.success("User updated successfully");
+      setEditingUser(null);
+      refetch();
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update user");
+    }
+  };
+
   const handleDeleteUser = async (userId: string) => {
     try {
       const { error } = await supabase
@@ -84,11 +109,6 @@ const UserManagement = () => {
     } catch (error: any) {
       toast.error(error.message || "Failed to delete user");
     }
-  };
-
-  const handleEditUser = (user: UserProfile) => {
-    // TODO: Implement edit user functionality
-    console.log("Edit user:", user);
   };
 
   if (isLoading) {
@@ -126,10 +146,28 @@ const UserManagement = () => {
         </Dialog>
       </div>
 
+      <Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit User</DialogTitle>
+            <DialogDescription>
+              Update the user's information.
+            </DialogDescription>
+          </DialogHeader>
+          {editingUser && (
+            <EditUserForm
+              user={editingUser}
+              onSubmit={handleEditUser}
+              onCancel={() => setEditingUser(null)}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
       <UserTable
         users={filteredUsers || []}
         onDeleteUser={handleDeleteUser}
-        onEditUser={handleEditUser}
+        onEditUser={setEditingUser}
       />
     </div>
   );
