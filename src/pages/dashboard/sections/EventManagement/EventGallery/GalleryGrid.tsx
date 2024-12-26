@@ -11,8 +11,8 @@ interface GalleryImage {
   image_url: string;
   description: string;
   tags: string[];
-  event_id: string;
-  events: {
+  event_id: string | null;
+  events?: {
     title: string;
   } | null;
 }

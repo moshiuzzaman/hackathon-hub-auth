@@ -14,7 +14,7 @@ const EventGallery = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("event_gallery")
-        .select("*")
+        .select("*, events(title)")
         .order("created_at", { ascending: false });
       if (error) throw error;
       return data;
