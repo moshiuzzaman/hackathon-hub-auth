@@ -25,7 +25,11 @@ const NewsManagement = () => {
         throw error;
       }
 
-      return data;
+      // Ensure meta_info is properly typed
+      return (data || []).map(item => ({
+        ...item,
+        meta_info: item.meta_info || { tags: [], category: "" }
+      })) as News[];
     },
   });
 

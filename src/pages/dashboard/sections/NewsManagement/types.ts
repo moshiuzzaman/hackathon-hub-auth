@@ -1,3 +1,5 @@
+import type { Json } from "@/integrations/supabase/types";
+
 export interface News {
   id: string;
   title: string;
@@ -5,7 +7,7 @@ export interface News {
   meta_info: {
     tags?: string[];
     category?: string;
-  } | null;
+  } | Json | null;
   published_at: string | null;
   created_by: string | null;
   created_at: string;
