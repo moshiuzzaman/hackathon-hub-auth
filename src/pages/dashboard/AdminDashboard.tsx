@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Users, Settings, Calendar, Newspaper } from "lucide-react";
 import { toast } from "sonner";
 import UserManagement from "./sections/UserManagement";
-import PlatformSettings from "./sections/PlatformSettings";
+import PlatformManagement from "./sections/PlatformManagement";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -42,7 +42,7 @@ const AdminDashboard = () => {
 
   const navigationItems = [
     { id: "users", icon: Users, label: "User Management", active: activeSection === "users" },
-    { id: "settings", icon: Settings, label: "Platform Settings", active: activeSection === "settings" },
+    { id: "platform", icon: Settings, label: "Platform Management", active: activeSection === "platform" },
     { id: "events", icon: Calendar, label: "Event Management", active: activeSection === "events" },
     { id: "news", icon: Newspaper, label: "News Management", active: activeSection === "news" },
   ];
@@ -51,8 +51,8 @@ const AdminDashboard = () => {
     switch (activeSection) {
       case "users":
         return <UserManagement />;
-      case "settings":
-        return <PlatformSettings />;
+      case "platform":
+        return <PlatformManagement />;
       default:
         return (
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">

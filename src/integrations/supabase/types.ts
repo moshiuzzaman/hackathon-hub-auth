@@ -135,23 +135,32 @@ export type Database = {
       platform_settings: {
         Row: {
           created_at: string
+          description: string | null
           id: string
           key: string
+          type: Database["public"]["Enums"]["setting_type"]
           updated_at: string
+          validation_schema: Json | null
           value: Json
         }
         Insert: {
           created_at?: string
+          description?: string | null
           id?: string
           key: string
+          type?: Database["public"]["Enums"]["setting_type"]
           updated_at?: string
+          validation_schema?: Json | null
           value: Json
         }
         Update: {
           created_at?: string
+          description?: string | null
           id?: string
           key?: string
+          type?: Database["public"]["Enums"]["setting_type"]
           updated_at?: string
+          validation_schema?: Json | null
           value?: Json
         }
         Relationships: []
@@ -215,6 +224,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      setting_type: "smtp" | "registration" | "system"
       user_role: "admin" | "organizer" | "moderator" | "mentor" | "participant"
     }
     CompositeTypes: {
