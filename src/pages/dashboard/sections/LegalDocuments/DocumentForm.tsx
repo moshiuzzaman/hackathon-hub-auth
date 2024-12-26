@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/RichTextEditor";
 import { toast } from "sonner";
 
 const formSchema = z.object({
@@ -39,34 +39,54 @@ interface DocumentFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  initialData?: {
+    id: string;
+    type: "terms" | "privacy";
+    content: string;
+  };
 }
 
-export const DocumentForm = ({ isOpen, onClose, onSuccess }: DocumentFormProps) => {
+export const DocumentForm = ({ isOpen, onClose, onSuccess, initialData }: DocumentFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isEditing = !!initialData;
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      type: "terms",
-      content: "",
+      type: initialData?.type || "terms",
+      content: initialData?.content || "",
     },
   });
 
   const onSubmit = async (data: FormData) => {
     try {
       setIsSubmitting(true);
-      const { error } = await supabase.from("legal_documents").insert({
-        type: data.type,
-        content: data.content,
-        version: "1.0.0", // Initial version
-      });
+      
+      if (isEditing) {
+        const { error } = await supabase
+          .from("legal_documents")
+          .update({
+            content: data.content,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", initialData.id);
 
-      if (error) throw error;
+        if (error) throw error;
+        toast.success("Document updated successfully");
+      } else {
+        const { error } = await supabase.from("legal_documents").insert({
+          type: data.type,
+          content: data.content,
+          version: "1.0.0",
+        });
 
-      toast.success("Document created successfully");
+        if (error) throw error;
+        toast.success("Document created successfully");
+      }
+      
       onSuccess();
     } catch (error: any) {
-      toast.error(error.message || "Failed to create document");
+      toast.error(error.message || "Failed to save document");
     } finally {
       setIsSubmitting(false);
     }
@@ -74,9 +94,11 @@ export const DocumentForm = ({ isOpen, onClose, onSuccess }: DocumentFormProps) 
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-4xl">
         <DialogHeader>
-          <DialogTitle>Create Legal Document</DialogTitle>
+          <DialogTitle>
+            {isEditing ? "Edit Legal Document" : "Create Legal Document"}
+          </DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -89,6 +111,7 @@ export const DocumentForm = ({ isOpen, onClose, onSuccess }: DocumentFormProps) 
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    disabled={isEditing}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -111,10 +134,9 @@ export const DocumentForm = ({ isOpen, onClose, onSuccess }: DocumentFormProps) 
                 <FormItem>
                   <FormLabel>Content</FormLabel>
                   <FormControl>
-                    <Textarea
-                      placeholder="Enter document content..."
-                      className="min-h-[300px]"
-                      {...field}
+                    <RichTextEditor
+                      content={field.value}
+                      onChange={field.onChange}
                     />
                   </FormControl>
                   <FormMessage />
@@ -131,7 +153,7 @@ export const DocumentForm = ({ isOpen, onClose, onSuccess }: DocumentFormProps) 
                 Cancel
               </Button>
               <Button type="submit" disabled={isSubmitting}>
-                Create Document
+                {isEditing ? "Update" : "Create"} Document
               </Button>
             </div>
           </form>

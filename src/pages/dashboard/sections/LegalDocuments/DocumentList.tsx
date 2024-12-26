@@ -20,8 +20,9 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Check, X } from "lucide-react";
+import { Check, Pencil, X } from "lucide-react";
 import { toast } from "sonner";
+import { DocumentForm } from "./DocumentForm";
 
 interface Document {
   id: string;
@@ -40,6 +41,7 @@ interface DocumentListProps {
 
 export const DocumentList = ({ documents, onRefresh }: DocumentListProps) => {
   const [publishingDoc, setPublishingDoc] = useState<Document | null>(null);
+  const [editingDoc, setEditingDoc] = useState<Document | null>(null);
 
   const handlePublish = async () => {
     if (!publishingDoc) return;
@@ -83,24 +85,38 @@ export const DocumentList = ({ documents, onRefresh }: DocumentListProps) => {
               <TableCell>{doc.version}</TableCell>
               <TableCell>
                 {doc.is_published ? (
-                  <Badge variant="success">Published</Badge>
+                  <Badge variant="outline" className="bg-green-100 text-green-800">
+                    Published
+                  </Badge>
                 ) : (
-                  <Badge variant="secondary">Draft</Badge>
+                  <Badge variant="outline" className="bg-gray-100">
+                    Draft
+                  </Badge>
                 )}
               </TableCell>
               <TableCell>
                 {new Date(doc.created_at).toLocaleDateString()}
               </TableCell>
               <TableCell>
-                {!doc.is_published && (
+                <div className="flex gap-2">
                   <Button
                     size="sm"
-                    onClick={() => setPublishingDoc(doc)}
-                    className="bg-green-500 hover:bg-green-600"
+                    variant="outline"
+                    onClick={() => setEditingDoc(doc)}
                   >
-                    <Check className="h-4 w-4" />
+                    <Pencil className="h-4 w-4" />
                   </Button>
-                )}
+                  {!doc.is_published && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="bg-green-100 hover:bg-green-200"
+                      onClick={() => setPublishingDoc(doc)}
+                    >
+                      <Check className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
               </TableCell>
             </TableRow>
           ))}
@@ -134,6 +150,18 @@ export const DocumentList = ({ documents, onRefresh }: DocumentListProps) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {editingDoc && (
+        <DocumentForm
+          isOpen={true}
+          onClose={() => setEditingDoc(null)}
+          onSuccess={() => {
+            setEditingDoc(null);
+            onRefresh();
+          }}
+          initialData={editingDoc}
+        />
+      )}
     </>
   );
 };
