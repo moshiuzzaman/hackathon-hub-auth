@@ -18,14 +18,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { UserProfile, UserRole } from "./types";
+import { UserProfile, UserRole, EditUserFormValues } from "./types";
 
 const editUserFormSchema = z.object({
   full_name: z.string().min(2, "Full name must be at least 2 characters"),
   role: z.enum(["admin", "organizer", "moderator", "mentor", "participant"] as const),
 });
-
-type EditUserFormValues = z.infer<typeof editUserFormSchema>;
 
 interface EditUserFormProps {
   user: UserProfile;
@@ -38,7 +36,7 @@ export const EditUserForm = ({ user, onSubmit, onCancel }: EditUserFormProps) =>
     resolver: zodResolver(editUserFormSchema),
     defaultValues: {
       full_name: user.full_name || "",
-      role: user.role as UserRole,
+      role: user.role,
     },
   });
 

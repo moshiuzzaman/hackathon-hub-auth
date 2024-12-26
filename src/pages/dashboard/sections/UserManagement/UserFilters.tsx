@@ -7,11 +7,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { UserRole } from "./types";
 
 interface UserFiltersProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
-  selectedRole: string | null;
+  selectedRole: UserRole | "all" | null;
   onRoleChange: (value: string) => void;
 }
 
@@ -21,7 +22,7 @@ export const UserFilters = ({
   selectedRole,
   onRoleChange,
 }: UserFiltersProps) => {
-  const userRoles = ["admin", "organizer", "moderator", "mentor", "participant"];
+  const userRoles: UserRole[] = ["admin", "organizer", "moderator", "mentor", "participant"];
 
   return (
     <div className="flex items-center gap-4 flex-1">

@@ -16,11 +16,11 @@ import { UserTable } from "./UserTable";
 import { UserFilters } from "./UserFilters";
 import { CreateUserForm, UserFormValues } from "./CreateUserForm";
 import { EditUserForm } from "./EditUserForm";
-import { UserProfile } from "./types";
+import { UserProfile, UserRole, EditUserFormValues } from "./types";
 
 const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRole, setSelectedRole] = useState<string | null>(null);
+  const [selectedRole, setSelectedRole] = useState<UserRole | "all" | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
 
@@ -72,7 +72,7 @@ const UserManagement = () => {
     }
   };
 
-  const handleEditUser = async (data: { full_name: string; role: string }) => {
+  const handleEditUser = async (data: EditUserFormValues) => {
     if (!editingUser) return;
 
     try {
@@ -122,7 +122,7 @@ const UserManagement = () => {
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           selectedRole={selectedRole}
-          onRoleChange={setSelectedRole}
+          onRoleChange={(role) => setSelectedRole(role as UserRole | "all")}
         />
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
