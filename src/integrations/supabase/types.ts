@@ -531,12 +531,15 @@ export type Database = {
       teams: {
         Row: {
           created_at: string
+          description: string | null
           github_repo_url: string | null
           id: string
           is_ready: boolean | null
           join_code: string
           leader_id: string | null
           logo_url: string | null
+          looking_for_members: boolean | null
+          max_members: number | null
           mentor_id: string | null
           name: string
           stack_id: string | null
@@ -544,12 +547,15 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          description?: string | null
           github_repo_url?: string | null
           id?: string
           is_ready?: boolean | null
           join_code: string
           leader_id?: string | null
           logo_url?: string | null
+          looking_for_members?: boolean | null
+          max_members?: number | null
           mentor_id?: string | null
           name: string
           stack_id?: string | null
@@ -557,12 +563,15 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          description?: string | null
           github_repo_url?: string | null
           id?: string
           is_ready?: boolean | null
           join_code?: string
           leader_id?: string | null
           logo_url?: string | null
+          looking_for_members?: boolean | null
+          max_members?: number | null
           mentor_id?: string | null
           name?: string
           stack_id?: string | null

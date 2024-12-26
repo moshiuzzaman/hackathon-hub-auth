@@ -17,6 +17,10 @@ export interface TeamWithDetails {
   name: string;
   join_code: string;
   is_ready: boolean;
+  description?: string;
+  looking_for_members?: boolean;
+  max_members?: number;
+  leader_id?: string;
   stack?: {
     id: string;
     name: string;

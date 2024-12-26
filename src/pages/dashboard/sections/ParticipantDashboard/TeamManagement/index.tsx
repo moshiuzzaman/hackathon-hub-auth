@@ -4,14 +4,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import CreateTeamForm from "./CreateTeamForm";
 import JoinTeamForm from "./JoinTeamForm";
 import TeamDetails from "./TeamDetails";
+import TeamLobby from "./TeamLobby";
 import type { TeamWithDetails } from "./types";
 
 const TeamManagement = () => {
   const { session } = useSessionContext();
   const queryClient = useQueryClient();
+  const [showLobby, setShowLobby] = useState(false);
 
   // Fetch user's team information
   const { data: teamMember, isLoading } = useQuery({
@@ -26,7 +29,11 @@ const TeamManagement = () => {
             name,
             is_ready,
             join_code,
-            stack:stack_id (
+            description,
+            looking_for_members,
+            max_members,
+            leader_id,
+            stack:technology_stacks (
               id,
               name
             ),
@@ -52,14 +59,25 @@ const TeamManagement = () => {
 
   // Create team mutation
   const createTeam = useMutation({
-    mutationFn: async ({ name, stackId }: { name: string; stackId: string }) => {
-      // Let the database trigger handle join_code generation
+    mutationFn: async ({
+      name,
+      stackId,
+      description,
+      lookingForMembers,
+    }: {
+      name: string;
+      stackId: string;
+      description: string;
+      lookingForMembers: boolean;
+    }) => {
       const { data: team, error: teamError } = await supabase
         .from("teams")
         .insert({
           name,
           stack_id: stackId,
           leader_id: session?.user.id,
+          description,
+          looking_for_members: lookingForMembers,
         })
         .select()
         .single();
@@ -86,6 +104,7 @@ const TeamManagement = () => {
     },
   });
 
+  // Join team mutation
   const joinTeam = useMutation({
     mutationFn: async (joinCode: string) => {
       const { data: team, error: teamError } = await supabase
@@ -164,6 +183,15 @@ const TeamManagement = () => {
     );
   }
 
+  if (showLobby) {
+    return (
+      <div className="space-y-4">
+        <Button onClick={() => setShowLobby(false)}>Back to Team Management</Button>
+        <TeamLobby />
+      </div>
+    );
+  }
+
   if (teamMember?.teams) {
     return (
       <TeamDetails
@@ -177,9 +205,12 @@ const TeamManagement = () => {
 
   return (
     <div className="space-y-6">
+      <Button onClick={() => setShowLobby(true)}>Browse Teams</Button>
       <CreateTeamForm
         stacks={[]}
-        onSubmit={(name, stackId) => createTeam.mutate({ name, stackId })}
+        onSubmit={(name, stackId, description, lookingForMembers) =>
+          createTeam.mutate({ name, stackId, description, lookingForMembers })
+        }
         isLoading={createTeam.isPending}
       />
       <JoinTeamForm
