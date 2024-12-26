@@ -91,6 +91,50 @@ export type Database = {
           },
         ]
       }
+      legal_documents: {
+        Row: {
+          content: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          is_published: boolean | null
+          published_at: string | null
+          type: Database["public"]["Enums"]["legal_document_type"]
+          updated_at: string | null
+          version: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_published?: boolean | null
+          published_at?: string | null
+          type: Database["public"]["Enums"]["legal_document_type"]
+          updated_at?: string | null
+          version: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          is_published?: boolean | null
+          published_at?: string | null
+          type?: Database["public"]["Enums"]["legal_document_type"]
+          updated_at?: string | null
+          version?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "legal_documents_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mentor_benefit_assignments: {
         Row: {
           benefit_id: string
@@ -356,9 +400,21 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_next_version: {
+        Args: {
+          doc_type: Database["public"]["Enums"]["legal_document_type"]
+        }
+        Returns: unknown
+      }
+      increment_semver: {
+        Args: {
+          current_version: unknown
+        }
+        Returns: unknown
+      }
     }
     Enums: {
+      legal_document_type: "terms" | "privacy"
       setting_type: "smtp" | "registration" | "system"
       user_role: "admin" | "organizer" | "moderator" | "mentor" | "participant"
     }

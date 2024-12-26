@@ -3,13 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Users, Settings, Calendar, Newspaper, UserCheck } from "lucide-react";
+import { Users, Settings, Calendar, Newspaper, UserCheck, FileText } from "lucide-react";
 import { toast } from "sonner";
 import UserManagement from "./sections/UserManagement";
 import PlatformManagement from "./sections/PlatformManagement";
 import EventManagement from "./sections/EventManagement";
 import NewsManagement from "./sections/NewsManagement";
 import MentorApplications from "./sections/UserManagement/MentorApplications";
+import LegalDocuments from "./sections/LegalDocuments";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -91,6 +92,7 @@ const AdminDashboard = () => {
     { id: "platform", icon: Settings, label: "Platform Management", active: activeSection === "platform" },
     { id: "events", icon: Calendar, label: "Event Management", active: activeSection === "events" },
     { id: "news", icon: Newspaper, label: "News Management", active: activeSection === "news" },
+    { id: "legal", icon: FileText, label: "Legal Documents", active: activeSection === "legal" },
   ];
 
   const renderSection = () => {
@@ -105,6 +107,8 @@ const AdminDashboard = () => {
         return <EventManagement />;
       case "news":
         return <NewsManagement />;
+      case "legal":
+        return <LegalDocuments />;
       default:
         return (
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
