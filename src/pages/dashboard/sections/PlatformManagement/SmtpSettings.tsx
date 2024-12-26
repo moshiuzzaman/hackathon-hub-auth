@@ -54,19 +54,11 @@ export const SmtpSettings = () => {
   const handleTestConnection = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/test-smtp`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          },
-          body: JSON.stringify(config),
-        }
-      );
+      const { data, error } = await supabase.functions.invoke("test-smtp", {
+        body: config,
+      });
 
-      const data = await response.json();
+      if (error) throw error;
 
       if (data.success) {
         toast.success("SMTP connection test successful");
