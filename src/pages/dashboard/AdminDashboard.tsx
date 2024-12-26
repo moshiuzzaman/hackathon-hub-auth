@@ -1,14 +1,16 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Users, Settings, Calendar, Newspaper } from "lucide-react";
 import { toast } from "sonner";
+import UserManagement from "./sections/UserManagement";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { session } = useSessionContext();
+  const [activeSection, setActiveSection] = useState("users");
 
   useEffect(() => {
     const checkAccess = async () => {
@@ -38,11 +40,26 @@ const AdminDashboard = () => {
   };
 
   const navigationItems = [
-    { icon: Users, label: "User Management", active: true },
-    { icon: Settings, label: "Platform Settings", active: false },
-    { icon: Calendar, label: "Event Management", active: false },
-    { icon: Newspaper, label: "News Management", active: false },
+    { id: "users", icon: Users, label: "User Management", active: activeSection === "users" },
+    { id: "settings", icon: Settings, label: "Platform Settings", active: activeSection === "settings" },
+    { id: "events", icon: Calendar, label: "Event Management", active: activeSection === "events" },
+    { id: "news", icon: Newspaper, label: "News Management", active: activeSection === "news" },
   ];
+
+  const renderSection = () => {
+    switch (activeSection) {
+      case "users":
+        return <UserManagement />;
+      default:
+        return (
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+            <p className="text-muted-foreground">
+              This section is under development.
+            </p>
+          </div>
+        );
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -56,7 +73,8 @@ const AdminDashboard = () => {
           <nav className="flex-1 p-4 space-y-2">
             {navigationItems.map((item) => (
               <button
-                key={item.label}
+                key={item.id}
+                onClick={() => setActiveSection(item.id)}
                 className={`flex items-center w-full px-4 py-2 text-sm rounded-md transition-colors
                   ${item.active 
                     ? "bg-sidebar-accent text-sidebar-accent-foreground" 
@@ -86,15 +104,11 @@ const AdminDashboard = () => {
         <main className="container p-6">
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <h2 className="text-3xl font-bold tracking-tight">User Management</h2>
+              <h2 className="text-3xl font-bold tracking-tight">
+                {navigationItems.find(item => item.id === activeSection)?.label}
+              </h2>
             </div>
-
-            {/* Content area - will be replaced with actual features */}
-            <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
-              <p className="text-muted-foreground">
-                Select a feature from the sidebar to manage users, platform settings, events, or news.
-              </p>
-            </div>
+            {renderSection()}
           </div>
         </main>
       </div>
