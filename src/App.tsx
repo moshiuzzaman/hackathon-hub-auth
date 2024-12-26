@@ -12,6 +12,7 @@ import PublicLayout from "./components/layout/PublicLayout";
 // Public Pages
 import Home from "./pages/public/Home";
 import News from "./pages/public/News";
+import NewsDetail from "./pages/public/NewsDetail";
 import Contact from "./pages/public/Contact";
 import Info from "./pages/public/Info";
 import Mentors from "./pages/public/Mentors";
@@ -42,6 +43,7 @@ const App = () => (
             <Route element={<PublicLayout />}>
               <Route path="/" element={<Home />} />
               <Route path="/news" element={<News />} />
+              <Route path="/news/:id" element={<NewsDetail />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/info" element={<Info />} />
               <Route path="/mentors" element={<Mentors />} />
