@@ -16,7 +16,7 @@ const Info = () => {
     },
   });
 
-  const privacyPolicy = documents?.find((doc) => doc.type === "privacy_policy");
+  const privacyPolicy = documents?.find((doc) => doc.type === "privacy");
   const terms = documents?.find((doc) => doc.type === "terms");
 
   return (
