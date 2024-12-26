@@ -1,116 +1,237 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Form } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { FormFields } from "./components/FormFields";
-import { BenefitFormProps, benefitFormSchema, type BenefitFormData, type Vendor } from "./types";
+import { BenefitFormProps, BenefitFormValues, benefitFormSchema } from "./types";
 
-const BenefitForm = ({ open, onOpenChange, benefit, onSuccess }: BenefitFormProps) => {
-  const [vendors, setVendors] = useState<Vendor[]>([]);
-  
-  const form = useForm<BenefitFormData>({
+export const BenefitForm = ({ initialData, onSuccess, onCancel }: BenefitFormProps) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const form = useForm<BenefitFormValues>({
     resolver: zodResolver(benefitFormSchema),
-    defaultValues: benefit ? {
-      vendor_id: benefit.vendor_id,
-      coupon_codes: benefit.coupon_code,
-      expiry_date: benefit.expiry_date,
-      user_type: benefit.user_type,
-    } : {
-      vendor_id: "",
-      coupon_codes: "",
-      expiry_date: "",
-      user_type: "all",
+    defaultValues: {
+      vendor_id: initialData?.vendor_id || "",
+      coupon_codes: initialData?.coupon_code || "",
+      expiry_date: initialData?.expiry_date || "",
+      user_type: (initialData?.user_type as "all" | "mentor" | "participant") || "all",
+      is_active: initialData?.is_active ?? true,
     },
   });
 
-  useEffect(() => {
-    const fetchVendors = async () => {
+  const { data: vendors } = useQuery({
+    queryKey: ["vendors"],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from("vendors")
-        .select("id, name");
-      
-      if (error) {
-        toast.error("Failed to load vendors");
-        return;
-      }
-      
-      setVendors(data);
-    };
+        .select("*")
+        .order("name");
 
-    fetchVendors();
-  }, []);
+      if (error) throw error;
+      return data;
+    },
+  });
 
-  const onSubmit = async (values: BenefitFormData) => {
+  const onSubmit = async (values: BenefitFormValues) => {
     try {
+      setIsSubmitting(true);
+
+      // Split coupon codes into an array and create a benefit for each code
       const couponCodes = values.coupon_codes
         .split("\n")
         .map(code => code.trim())
         .filter(code => code.length > 0);
 
-      if (benefit) {
+      if (initialData) {
         // Update existing benefit
         const { error } = await supabase
           .from("benefits")
           .update({
             vendor_id: values.vendor_id,
-            coupon_code: couponCodes[0], // Only update first code for existing benefit
+            coupon_code: couponCodes[0], // Only use first code when updating
             expiry_date: values.expiry_date || null,
-            user_type: values.user_type || null,
+            user_type: values.user_type,
+            is_active: values.is_active,
           })
-          .eq("id", benefit.id);
-        
+          .eq("id", initialData.id);
+
         if (error) throw error;
-        toast.success("Benefit updated successfully");
       } else {
-        // Insert new benefits (one per coupon code)
+        // Create new benefits for each coupon code
+        const benefitsToInsert = couponCodes.map(code => ({
+          vendor_id: values.vendor_id,
+          coupon_code: code,
+          expiry_date: values.expiry_date || null,
+          user_type: values.user_type,
+          is_active: values.is_active,
+          provider_name: "",
+          provider_website: "",
+          redemption_instructions: "",
+        }));
+
         const { error } = await supabase
           .from("benefits")
-          .insert(couponCodes.map(code => ({
-            vendor_id: values.vendor_id,
-            coupon_code: code,
-            expiry_date: values.expiry_date || null,
-            user_type: values.user_type || null,
-            is_active: true,
-          })));
-        
+          .insert(benefitsToInsert);
+
         if (error) throw error;
-        toast.success(`${couponCodes.length} benefit(s) added successfully`);
       }
-      
+
+      toast.success(initialData ? "Benefit updated" : "Benefits created");
       onSuccess();
-      onOpenChange(false);
-      form.reset();
     } catch (error: any) {
       toast.error(error.message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{benefit ? "Edit Benefit" : "Add New Benefits"}</DialogTitle>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormFields form={form} vendors={vendors} />
-            <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button type="submit">
-                {benefit ? "Update" : "Add"} Benefit{!benefit && "s"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <FormField
+          control={form.control}
+          name="vendor_id"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Vendor</FormLabel>
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={isSubmitting}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a vendor" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {vendors?.map((vendor) => (
+                    <SelectItem key={vendor.id} value={vendor.id}>
+                      {vendor.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="coupon_codes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Coupon Code{!initialData && "s"}</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder={initialData ? "Enter coupon code" : "Enter coupon codes (one per line)"}
+                  disabled={isSubmitting}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="expiry_date"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Expiry Date</FormLabel>
+              <FormControl>
+                <Input
+                  type="datetime-local"
+                  disabled={isSubmitting}
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="user_type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>User Type</FormLabel>
+              <Select
+                value={field.value}
+                onValueChange={field.onChange}
+                disabled={isSubmitting}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select user type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="all">All Users</SelectItem>
+                  <SelectItem value="mentor">Mentors Only</SelectItem>
+                  <SelectItem value="participant">Participants Only</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="is_active"
+          render={({ field }) => (
+            <FormItem className="flex items-center gap-2">
+              <FormControl>
+                <input
+                  type="checkbox"
+                  checked={field.value}
+                  onChange={field.onChange}
+                  disabled={isSubmitting}
+                />
+              </FormControl>
+              <FormLabel className="!mt-0">Active</FormLabel>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="flex justify-end gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {initialData ? "Update" : "Create"} Benefit{!initialData && "s"}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 };
-
-export default BenefitForm;

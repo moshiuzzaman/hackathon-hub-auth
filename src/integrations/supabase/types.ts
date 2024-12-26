@@ -59,9 +59,9 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_assigned: boolean | null
-          provider_name: string
-          provider_website: string
-          redemption_instructions: string
+          provider_name: string | null
+          provider_website: string | null
+          redemption_instructions: string | null
           updated_at: string
           user_type: string | null
           vendor_id: string | null
@@ -73,9 +73,9 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_assigned?: boolean | null
-          provider_name: string
-          provider_website: string
-          redemption_instructions: string
+          provider_name?: string | null
+          provider_website?: string | null
+          redemption_instructions?: string | null
           updated_at?: string
           user_type?: string | null
           vendor_id?: string | null
@@ -87,9 +87,9 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_assigned?: boolean | null
-          provider_name?: string
-          provider_website?: string
-          redemption_instructions?: string
+          provider_name?: string | null
+          provider_website?: string | null
+          redemption_instructions?: string | null
           updated_at?: string
           user_type?: string | null
           vendor_id?: string | null
