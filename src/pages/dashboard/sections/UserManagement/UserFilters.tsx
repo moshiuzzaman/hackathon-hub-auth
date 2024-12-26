@@ -13,7 +13,7 @@ interface UserFiltersProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;
   selectedRole: UserRole | "all" | null;
-  onRoleChange: (value: string) => void;
+  onRoleChange: (value: UserRole | "all") => void;
 }
 
 export const UserFilters = ({

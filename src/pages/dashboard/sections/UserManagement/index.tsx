@@ -90,7 +90,6 @@ const UserManagement = () => {
 
   const handleDeleteUser = async (userId: string) => {
     try {
-      // First delete from auth.users which will cascade to profiles due to FK constraint
       const { error: authError } = await supabase.auth.admin.deleteUser(userId);
       if (authError) throw authError;
 
@@ -98,7 +97,7 @@ const UserManagement = () => {
       refetch();
     } catch (error: any) {
       toast.error(error.message || "Failed to delete user");
-      throw error; // Re-throw to be handled by the UserTable component
+      throw error;
     }
   };
 
@@ -113,7 +112,7 @@ const UserManagement = () => {
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           selectedRole={selectedRole}
-          onRoleChange={(role) => setSelectedRole(role)}
+          onRoleChange={(role: UserRole | "all") => setSelectedRole(role)}
         />
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
