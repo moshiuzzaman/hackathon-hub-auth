@@ -66,6 +66,7 @@ const TeamManagement = () => {
   // Create team mutation
   const createTeam = useMutation({
     mutationFn: async ({ name, stackId }: { name: string; stackId: string }) => {
+      // Let the database trigger handle join_code generation
       const { data: team, error: teamError } = await supabase
         .from("teams")
         .insert({

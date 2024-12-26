@@ -8,7 +8,7 @@ export interface TeamMember {
   id: string;
   profile: {
     id: string;
-    full_name: string;
+    full_name: string | null;
   };
 }
 
@@ -22,7 +22,7 @@ export interface TeamWithDetails {
     name: string;
   };
   mentor?: {
-    full_name: string;
-  };
+    full_name: string | null;
+  } | null;
   members?: TeamMember[];
 }
