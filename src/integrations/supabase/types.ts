@@ -104,6 +104,36 @@ export type Database = {
           },
         ]
       }
+      contact_settings: {
+        Row: {
+          additional_info: string | null
+          address: string | null
+          created_at: string | null
+          email: string | null
+          id: string
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          additional_info?: string | null
+          address?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          additional_info?: string | null
+          address?: string | null
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       event_gallery: {
         Row: {
           created_at: string
@@ -185,6 +215,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      home_page_settings: {
+        Row: {
+          created_at: string | null
+          hero_image_url: string | null
+          hero_subtitle: string | null
+          hero_title: string
+          id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          hero_image_url?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string
+          id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          hero_image_url?: string | null
+          hero_subtitle?: string | null
+          hero_title?: string
+          id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       legal_documents: {
         Row: {
@@ -306,6 +363,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      partners: {
+        Row: {
+          created_at: string | null
+          display_order: number | null
+          id: string
+          is_active: boolean | null
+          logo_url: string
+          name: string
+          updated_at: string | null
+          website_url: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          logo_url: string
+          name: string
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          display_order?: number | null
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string
+          name?: string
+          updated_at?: string | null
+          website_url?: string | null
+        }
+        Relationships: []
       }
       platform_settings: {
         Row: {
