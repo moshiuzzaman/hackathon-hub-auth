@@ -3,25 +3,14 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Check, Users } from "lucide-react";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { toast } from "sonner";
+import { VendorSelect } from "./components/VendorSelect";
+import { UserSelect } from "./components/UserSelect";
+import { User, Vendor, Benefit } from "./types";
 
 const formSchema = z.object({
   userIds: z.array(z.string()).min(1, "Select at least one user"),
@@ -46,7 +35,7 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
     },
   });
 
-  const { data: users = [] } = useQuery({
+  const { data: users = [] } = useQuery<User[]>({
     queryKey: ["mentors"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -58,7 +47,7 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
     },
   });
 
-  const { data: vendors = [] } = useQuery({
+  const { data: vendors = [] } = useQuery<Vendor[]>({
     queryKey: ["vendors"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -70,7 +59,7 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
     },
   });
 
-  const { data: unassignedBenefits = [] } = useQuery({
+  const { data: unassignedBenefits = [] } = useQuery<Benefit[]>({
     queryKey: ["unassigned-benefits", selectedVendor],
     enabled: !!selectedVendor,
     queryFn: async () => {
@@ -84,6 +73,18 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
       return data || [];
     },
   });
+
+  const handleUserSelect = (userId: string) => {
+    const newSelection = selectedUsers.includes(userId)
+      ? selectedUsers.filter(id => id !== userId)
+      : [...selectedUsers, userId];
+    setSelectedUsers(newSelection);
+    form.setValue("userIds", newSelection);
+  };
+
+  const handleVendorSelect = (vendorId: string) => {
+    setSelectedVendor(vendorId);
+  };
 
   const onSubmit = async () => {
     try {
@@ -135,76 +136,17 @@ const AssignmentDialog = ({ open, onOpenChange, onSuccess }: AssignmentDialogPro
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="vendorId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Select Vendor</FormLabel>
-                  <FormControl>
-                    <Command className="border rounded-md">
-                      <CommandInput placeholder="Search vendors..." />
-                      <CommandEmpty>No vendors found.</CommandEmpty>
-                      <CommandGroup className="max-h-40 overflow-y-auto">
-                        {vendors.map((vendor) => (
-                          <CommandItem
-                            key={vendor.id}
-                            value={vendor.id}
-                            onSelect={() => {
-                              field.onChange(vendor.id);
-                              setSelectedVendor(vendor.id);
-                            }}
-                          >
-                            {vendor.name}
-                            {field.value === vendor.id && (
-                              <Check className="ml-auto h-4 w-4" />
-                            )}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </FormControl>
-                </FormItem>
-              )}
+            <VendorSelect
+              form={form}
+              vendors={vendors}
+              onVendorSelect={handleVendorSelect}
             />
 
-            <FormField
-              control={form.control}
-              name="userIds"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Select Users</FormLabel>
-                  <FormControl>
-                    <Command className="border rounded-md">
-                      <CommandInput placeholder="Search users..." />
-                      <CommandEmpty>No users found.</CommandEmpty>
-                      <CommandGroup className="max-h-40 overflow-y-auto">
-                        {users.map((user) => (
-                          <CommandItem
-                            key={user.id}
-                            value={user.id}
-                            onSelect={() => {
-                              const newSelection = selectedUsers.includes(user.id)
-                                ? selectedUsers.filter(id => id !== user.id)
-                                : [...selectedUsers, user.id];
-                              setSelectedUsers(newSelection);
-                              field.onChange(newSelection);
-                            }}
-                          >
-                            <div className="flex items-center">
-                              <Users className="mr-2 h-4 w-4" />
-                              {user.full_name || user.id}
-                            </div>
-                            {selectedUsers.includes(user.id) && (
-                              <Check className="ml-auto h-4 w-4" />
-                            )}
-                          </CommandItem>
-                        ))}
-                      </CommandGroup>
-                    </Command>
-                  </FormControl>
-                </FormItem>
-              )}
+            <UserSelect
+              form={form}
+              users={users}
+              selectedUsers={selectedUsers}
+              onUserSelect={handleUserSelect}
             />
 
             {selectedVendor && (
