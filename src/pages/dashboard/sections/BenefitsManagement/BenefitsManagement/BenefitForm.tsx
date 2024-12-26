@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
+// Define the form schema with required fields matching the database schema
 const formSchema = z.object({
   provider_name: z.string().min(1, "Provider name is required"),
   provider_website: z.string().url("Must be a valid URL"),
@@ -21,17 +22,29 @@ const formSchema = z.object({
   vendor_id: z.string().min(1, "Vendor is required"),
 });
 
+// Define the type for the form data
+type BenefitFormData = z.infer<typeof formSchema>;
+
 interface BenefitFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  benefit?: any;
+  benefit?: {
+    id: string;
+    provider_name: string;
+    provider_website: string;
+    coupon_code: string;
+    redemption_instructions: string;
+    expiry_date?: string;
+    user_type?: string;
+    vendor_id: string;
+  };
   onSuccess: () => void;
 }
 
 const BenefitForm = ({ open, onOpenChange, benefit, onSuccess }: BenefitFormProps) => {
   const [vendors, setVendors] = useState<any[]>([]);
   
-  const form = useForm({
+  const form = useForm<BenefitFormData>({
     resolver: zodResolver(formSchema),
     defaultValues: benefit || {
       provider_name: "",
@@ -44,24 +57,47 @@ const BenefitForm = ({ open, onOpenChange, benefit, onSuccess }: BenefitFormProp
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: BenefitFormData) => {
     try {
       if (benefit) {
+        // Update existing benefit
         const { error } = await supabase
           .from("benefits")
-          .update(values)
+          .update({
+            provider_name: values.provider_name,
+            provider_website: values.provider_website,
+            coupon_code: values.coupon_code,
+            redemption_instructions: values.redemption_instructions,
+            expiry_date: values.expiry_date || null,
+            user_type: values.user_type || null,
+            vendor_id: values.vendor_id,
+          })
           .eq("id", benefit.id);
+        
         if (error) throw error;
         toast.success("Benefit updated successfully");
       } else {
+        // Insert new benefit
         const { error } = await supabase
           .from("benefits")
-          .insert([values]);
+          .insert([{
+            provider_name: values.provider_name,
+            provider_website: values.provider_website,
+            coupon_code: values.coupon_code,
+            redemption_instructions: values.redemption_instructions,
+            expiry_date: values.expiry_date || null,
+            user_type: values.user_type || null,
+            vendor_id: values.vendor_id,
+            is_active: true,
+          }]);
+        
         if (error) throw error;
         toast.success("Benefit added successfully");
       }
+      
       onSuccess();
       onOpenChange(false);
+      form.reset();
     } catch (error: any) {
       toast.error(error.message);
     }
