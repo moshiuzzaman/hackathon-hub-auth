@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Users, Settings, Calendar, Newspaper, UserCheck, FileText } from "lucide-react";
+import { Users, Settings, Calendar, Newspaper, UserCheck, FileText, Gift } from "lucide-react";
 import { toast } from "sonner";
 import UserManagement from "./sections/UserManagement";
 import PlatformManagement from "./sections/PlatformManagement";
@@ -11,6 +11,7 @@ import EventManagement from "./sections/EventManagement";
 import NewsManagement from "./sections/NewsManagement";
 import MentorApplications from "./sections/UserManagement/MentorApplications";
 import LegalDocuments from "./sections/LegalDocuments";
+import BenefitsManagement from "./sections/BenefitsManagement";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -93,6 +94,7 @@ const AdminDashboard = () => {
     { id: "events", icon: Calendar, label: "Event Management", active: activeSection === "events" },
     { id: "news", icon: Newspaper, label: "News Management", active: activeSection === "news" },
     { id: "legal", icon: FileText, label: "Legal Documents", active: activeSection === "legal" },
+    { id: "benefits", icon: Gift, label: "Benefits", active: activeSection === "benefits" },
   ];
 
   const renderSection = () => {
@@ -109,6 +111,8 @@ const AdminDashboard = () => {
         return <NewsManagement />;
       case "legal":
         return <LegalDocuments />;
+      case "benefits":
+        return <BenefitsManagement />;
       default:
         return (
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">

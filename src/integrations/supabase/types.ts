@@ -9,6 +9,101 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      benefit_assignments: {
+        Row: {
+          benefit_id: string
+          created_at: string
+          id: string
+          is_redeemed: boolean | null
+          redeemed_at: string | null
+          user_id: string
+        }
+        Insert: {
+          benefit_id: string
+          created_at?: string
+          id?: string
+          is_redeemed?: boolean | null
+          redeemed_at?: string | null
+          user_id: string
+        }
+        Update: {
+          benefit_id?: string
+          created_at?: string
+          id?: string
+          is_redeemed?: boolean | null
+          redeemed_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_benefit_assignments_benefit_id_fkey"
+            columns: ["benefit_id"]
+            isOneToOne: false
+            referencedRelation: "benefits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentor_benefit_assignments_mentor_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      benefits: {
+        Row: {
+          coupon_code: string
+          created_at: string
+          expiry_date: string | null
+          id: string
+          is_active: boolean | null
+          is_assigned: boolean | null
+          provider_name: string
+          provider_website: string
+          redemption_instructions: string
+          updated_at: string
+          user_type: string | null
+          vendor_id: string | null
+        }
+        Insert: {
+          coupon_code: string
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_assigned?: boolean | null
+          provider_name: string
+          provider_website: string
+          redemption_instructions: string
+          updated_at?: string
+          user_type?: string | null
+          vendor_id?: string | null
+        }
+        Update: {
+          coupon_code?: string
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_assigned?: boolean | null
+          provider_name?: string
+          provider_website?: string
+          redemption_instructions?: string
+          updated_at?: string
+          user_type?: string | null
+          vendor_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "benefits_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_gallery: {
         Row: {
           created_at: string
@@ -134,84 +229,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      mentor_benefit_assignments: {
-        Row: {
-          benefit_id: string
-          created_at: string
-          id: string
-          is_redeemed: boolean | null
-          mentor_id: string
-          redeemed_at: string | null
-        }
-        Insert: {
-          benefit_id: string
-          created_at?: string
-          id?: string
-          is_redeemed?: boolean | null
-          mentor_id: string
-          redeemed_at?: string | null
-        }
-        Update: {
-          benefit_id?: string
-          created_at?: string
-          id?: string
-          is_redeemed?: boolean | null
-          mentor_id?: string
-          redeemed_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "mentor_benefit_assignments_benefit_id_fkey"
-            columns: ["benefit_id"]
-            isOneToOne: false
-            referencedRelation: "mentor_benefits"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "mentor_benefit_assignments_mentor_id_fkey"
-            columns: ["mentor_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      mentor_benefits: {
-        Row: {
-          coupon_code: string
-          created_at: string
-          expiry_date: string | null
-          id: string
-          is_active: boolean | null
-          provider_name: string
-          provider_website: string
-          redemption_instructions: string
-          updated_at: string
-        }
-        Insert: {
-          coupon_code: string
-          created_at?: string
-          expiry_date?: string | null
-          id?: string
-          is_active?: boolean | null
-          provider_name: string
-          provider_website: string
-          redemption_instructions: string
-          updated_at?: string
-        }
-        Update: {
-          coupon_code?: string
-          created_at?: string
-          expiry_date?: string | null
-          id?: string
-          is_active?: boolean | null
-          provider_name?: string
-          provider_website?: string
-          redemption_instructions?: string
-          updated_at?: string
-        }
-        Relationships: []
       }
       mentor_stacks: {
         Row: {
@@ -392,6 +409,36 @@ export type Database = {
           is_enabled?: boolean
           name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      vendors: {
+        Row: {
+          created_at: string
+          icon: string
+          id: string
+          name: string
+          redemption_instructions: string
+          updated_at: string
+          website: string
+        }
+        Insert: {
+          created_at?: string
+          icon: string
+          id?: string
+          name: string
+          redemption_instructions: string
+          updated_at?: string
+          website: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string
+          id?: string
+          name?: string
+          redemption_instructions?: string
+          updated_at?: string
+          website?: string
         }
         Relationships: []
       }
