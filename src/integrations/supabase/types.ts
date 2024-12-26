@@ -91,6 +91,120 @@ export type Database = {
           },
         ]
       }
+      mentor_benefit_assignments: {
+        Row: {
+          benefit_id: string
+          created_at: string
+          id: string
+          is_redeemed: boolean | null
+          mentor_id: string
+          redeemed_at: string | null
+        }
+        Insert: {
+          benefit_id: string
+          created_at?: string
+          id?: string
+          is_redeemed?: boolean | null
+          mentor_id: string
+          redeemed_at?: string | null
+        }
+        Update: {
+          benefit_id?: string
+          created_at?: string
+          id?: string
+          is_redeemed?: boolean | null
+          mentor_id?: string
+          redeemed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_benefit_assignments_benefit_id_fkey"
+            columns: ["benefit_id"]
+            isOneToOne: false
+            referencedRelation: "mentor_benefits"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentor_benefit_assignments_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentor_benefits: {
+        Row: {
+          coupon_code: string
+          created_at: string
+          expiry_date: string | null
+          id: string
+          is_active: boolean | null
+          provider_name: string
+          provider_website: string
+          redemption_instructions: string
+          updated_at: string
+        }
+        Insert: {
+          coupon_code: string
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          provider_name: string
+          provider_website: string
+          redemption_instructions: string
+          updated_at?: string
+        }
+        Update: {
+          coupon_code?: string
+          created_at?: string
+          expiry_date?: string | null
+          id?: string
+          is_active?: boolean | null
+          provider_name?: string
+          provider_website?: string
+          redemption_instructions?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      mentor_stacks: {
+        Row: {
+          created_at: string
+          id: string
+          mentor_id: string
+          stack_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mentor_id: string
+          stack_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mentor_id?: string
+          stack_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_stacks_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mentor_stacks_stack_id_fkey"
+            columns: ["stack_id"]
+            isOneToOne: false
+            referencedRelation: "technology_stacks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       news: {
         Row: {
           content: string
@@ -169,21 +283,42 @@ export type Database = {
         Row: {
           created_at: string
           full_name: string | null
+          github_username: string | null
           id: string
+          linkedin_username: string | null
+          max_teams: number | null
+          mentor_approval_date: string | null
+          mentor_status: string | null
+          photo_url: string | null
+          rejection_reason: string | null
           role: Database["public"]["Enums"]["user_role"]
           updated_at: string
         }
         Insert: {
           created_at?: string
           full_name?: string | null
+          github_username?: string | null
           id: string
+          linkedin_username?: string | null
+          max_teams?: number | null
+          mentor_approval_date?: string | null
+          mentor_status?: string | null
+          photo_url?: string | null
+          rejection_reason?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
         Update: {
           created_at?: string
           full_name?: string | null
+          github_username?: string | null
           id?: string
+          linkedin_username?: string | null
+          max_teams?: number | null
+          mentor_approval_date?: string | null
+          mentor_status?: string | null
+          photo_url?: string | null
+          rejection_reason?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
         }
