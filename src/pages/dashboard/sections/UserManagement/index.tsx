@@ -4,24 +4,16 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
 import { toast } from "sonner";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { UserTable } from "./UserTable";
 import { UserFilters } from "./UserFilters";
 import { CreateUserForm } from "./CreateUserForm";
 import { EditUserDialog } from "./EditUserDialog";
-import { UserProfile, UserRole, EditUserFormValues } from "./types";
-import type { UserFormValues } from "./CreateUserForm";
+import { UserProfile, EditUserFormValues } from "./types";
 
 const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRole, setSelectedRole] = useState<UserRole | "all" | null>(null);
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
 
@@ -98,17 +90,15 @@ const UserManagement = () => {
 
   const handleDeleteUser = async (userId: string) => {
     try {
-      const { error } = await supabase
-        .from("profiles")
-        .delete()
-        .eq("id", userId);
-
-      if (error) throw error;
+      // First delete from auth.users which will cascade to profiles due to FK constraint
+      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+      if (authError) throw authError;
 
       toast.success("User deleted successfully");
       refetch();
     } catch (error: any) {
       toast.error(error.message || "Failed to delete user");
+      throw error; // Re-throw to be handled by the UserTable component
     }
   };
 
@@ -123,7 +113,7 @@ const UserManagement = () => {
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           selectedRole={selectedRole}
-          onRoleChange={(role) => setSelectedRole(role as UserRole | "all")}
+          onRoleChange={(role) => setSelectedRole(role)}
         />
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
