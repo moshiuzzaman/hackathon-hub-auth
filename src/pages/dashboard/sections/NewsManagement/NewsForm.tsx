@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Bold, Italic, List, ListOrdered } from "lucide-react";
 import { toast } from "sonner";
 import type { News, NewsFormData } from "./types";
 
@@ -29,6 +30,53 @@ interface NewsFormProps {
   selectedNews: News | null;
   onClose: () => void;
 }
+
+const MenuBar = ({ editor }: { editor: any }) => {
+  if (!editor) {
+    return null;
+  }
+
+  return (
+    <div className="flex gap-2 p-2 border-b">
+      <Button
+        variant="outline"
+        size="icon"
+        type="button"
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        className={editor.isActive('bold') ? 'bg-accent' : ''}
+      >
+        <Bold className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="outline"
+        size="icon"
+        type="button"
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        className={editor.isActive('italic') ? 'bg-accent' : ''}
+      >
+        <Italic className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="outline"
+        size="icon"
+        type="button"
+        onClick={() => editor.chain().focus().toggleBulletList().run()}
+        className={editor.isActive('bulletList') ? 'bg-accent' : ''}
+      >
+        <List className="h-4 w-4" />
+      </Button>
+      <Button
+        variant="outline"
+        size="icon"
+        type="button"
+        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        className={editor.isActive('orderedList') ? 'bg-accent' : ''}
+      >
+        <ListOrdered className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+};
 
 const NewsForm = ({ open, onOpenChange, selectedNews, onClose }: NewsFormProps) => {
   const queryClient = useQueryClient();
@@ -51,11 +99,15 @@ const NewsForm = ({ open, onOpenChange, selectedNews, onClose }: NewsFormProps) 
     onUpdate: ({ editor }) => {
       form.setValue("content", editor.getHTML());
     },
+    editorProps: {
+      attributes: {
+        class: 'prose prose-sm sm:prose lg:prose-lg xl:prose-2xl mx-auto focus:outline-none',
+      },
+    },
   });
 
   useEffect(() => {
     if (selectedNews) {
-      // Parse meta_info safely with type checking
       let parsedMetaInfo = {
         tags: [] as string[],
         category: ""
@@ -64,12 +116,10 @@ const NewsForm = ({ open, onOpenChange, selectedNews, onClose }: NewsFormProps) 
       if (selectedNews.meta_info && typeof selectedNews.meta_info === 'object' && !Array.isArray(selectedNews.meta_info)) {
         const metaInfo = selectedNews.meta_info as Record<string, unknown>;
         
-        // Safely check and assign tags
         if (Array.isArray(metaInfo.tags)) {
           parsedMetaInfo.tags = metaInfo.tags.filter(tag => typeof tag === 'string');
         }
         
-        // Safely check and assign category
         if (typeof metaInfo.category === 'string') {
           parsedMetaInfo.category = metaInfo.category;
         }
@@ -146,8 +196,11 @@ const NewsForm = ({ open, onOpenChange, selectedNews, onClose }: NewsFormProps) 
             <FormItem>
               <FormLabel>Content</FormLabel>
               <FormControl>
-                <div className="border rounded-md p-2 min-h-[200px]">
-                  <EditorContent editor={editor} />
+                <div className="border rounded-md overflow-hidden">
+                  <MenuBar editor={editor} />
+                  <div className="min-h-[200px] p-4">
+                    <EditorContent editor={editor} />
+                  </div>
                 </div>
               </FormControl>
               <FormMessage />
