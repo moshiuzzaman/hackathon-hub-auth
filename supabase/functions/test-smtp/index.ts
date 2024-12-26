@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
+import { SmtpClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -29,11 +29,12 @@ const handler = async (req: Request): Promise<Response> => {
     const client = new SmtpClient();
     
     try {
-      await client.connectTLS({
+      await client.connect({
         hostname: config.host,
         port: config.port,
         username: config.auth.user,
         password: config.auth.pass,
+        tls: config.secure,
       });
       
       await client.close();
@@ -46,6 +47,7 @@ const handler = async (req: Request): Promise<Response> => {
         }
       );
     } catch (error) {
+      console.error("SMTP connection error:", error);
       return new Response(
         JSON.stringify({ 
           success: false, 
@@ -59,6 +61,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
   } catch (error) {
+    console.error("Request parsing error:", error);
     return new Response(
       JSON.stringify({ 
         success: false, 
