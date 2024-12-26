@@ -1,5 +1,5 @@
-import { ThemeColors, isThemeColors } from "./theme-colors";
-import { ThemeFonts, isThemeFonts } from "./theme-fonts";
+import { ThemeColors } from "./theme-colors";
+import { ThemeFonts } from "./theme-fonts";
 import type { Json } from "@/integrations/supabase/types";
 
 export interface Theme {
@@ -43,6 +43,23 @@ export const parseTheme = (data: {
     colors: data.colors,
     fonts: data.fonts,
   };
+};
+
+export const isThemeColors = (json: Json): json is ThemeColors => {
+  if (typeof json !== 'object' || !json) return false;
+  
+  const requiredKeys = ['primary', 'secondary'];
+  
+  return requiredKeys.every(key => 
+    typeof (json as any)[key] === 'string'
+  );
+};
+
+export const isThemeFonts = (json: Json): json is ThemeFonts => {
+  if (typeof json !== 'object' || !json) return false;
+  
+  return Array.isArray((json as any).primary) &&
+    (json as any).primary.every((font: any) => typeof font === 'string');
 };
 
 export type { ThemeColors, ThemeFonts };

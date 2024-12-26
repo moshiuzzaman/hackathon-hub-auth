@@ -18,11 +18,12 @@ const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   type: z.enum(["default", "custom"]).default("custom"),
   is_active: z.boolean().default(false),
-  colors: z.record(z.string()),
+  colors: z.object({
+    primary: z.string(),
+    secondary: z.string(),
+  }),
   fonts: z.object({
-    sans: z.array(z.string()),
-    serif: z.array(z.string()),
-    mono: z.array(z.string()),
+    primary: z.array(z.string()),
   }),
 });
 
@@ -43,30 +44,11 @@ const ThemeForm = ({ open, onOpenChange, selectedTheme, onClose }: ThemeFormProp
       name: selectedTheme?.name ?? "",
       type: "custom",
       colors: selectedTheme?.colors ?? {
-        background: "0 0% 100%",
-        foreground: "222.2 84% 4.9%",
-        card: "0 0% 100%",
-        cardForeground: "222.2 84% 4.9%",
-        popover: "0 0% 100%",
-        popoverForeground: "222.2 84% 4.9%",
-        primary: "222.2 47.4% 11.2%",
-        primaryForeground: "210 40% 98%",
-        secondary: "210 40% 96.1%",
-        secondaryForeground: "222.2 47.4% 11.2%",
-        muted: "210 40% 96.1%",
-        mutedForeground: "215.4 16.3% 46.9%",
-        accent: "210 40% 96.1%",
-        accentForeground: "222.2 47.4% 11.2%",
-        destructive: "0 84.2% 60.2%",
-        destructiveForeground: "210 40% 98%",
-        border: "214.3 31.8% 91.4%",
-        input: "214.3 31.8% 91.4%",
-        ring: "222.2 84% 4.9%",
+        primary: "#8B5CF6",
+        secondary: "#E5DEFF",
       },
       fonts: selectedTheme?.fonts ?? {
-        sans: ["Inter", "sans-serif"],
-        serif: ["Georgia", "serif"],
-        mono: ["Menlo", "monospace"],
+        primary: ["Inter", "sans-serif"],
       },
       is_active: selectedTheme?.is_active ?? false,
     },
@@ -150,29 +132,26 @@ const ThemeForm = ({ open, onOpenChange, selectedTheme, onClose }: ThemeFormProp
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Colors</h3>
               <div className="grid grid-cols-2 gap-4">
-                {Object.keys(form.getValues().colors).map((key) => (
-                  <ColorField
-                    key={key}
-                    control={form.control}
-                    colorKey={key}
-                    label={key.replace(/([A-Z])/g, " $1").trim()}
-                  />
-                ))}
+                <ColorField
+                  control={form.control}
+                  colorKey="primary"
+                  label="Primary Color"
+                />
+                <ColorField
+                  control={form.control}
+                  colorKey="secondary"
+                  label="Secondary Color"
+                />
               </div>
             </div>
 
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Fonts</h3>
-              <div className="space-y-4">
-                {Object.keys(form.getValues().fonts).map((key) => (
-                  <FontField
-                    key={key}
-                    control={form.control}
-                    fontKey={key}
-                    label={key}
-                  />
-                ))}
-              </div>
+              <FontField
+                control={form.control}
+                fontKey="primary"
+                label="Primary Font"
+              />
             </div>
 
             <div className="flex justify-end space-x-2">

@@ -3,13 +3,26 @@ import { Button } from "@/components/ui/button";
 import { Plus, Minus } from "lucide-react";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import type { Control } from "react-hook-form";
-import type { ThemeFormData } from "../types";
+import type { ThemeFormData } from "../types/theme";
 
 interface FontFieldProps {
   control: Control<ThemeFormData>;
   fontKey: keyof ThemeFormData["fonts"];
   label: string;
 }
+
+const GOOGLE_FONTS = [
+  "Inter",
+  "Roboto",
+  "Open Sans",
+  "Lato",
+  "Montserrat",
+  "Poppins",
+  "Source Sans Pro",
+  "Raleway",
+  "Ubuntu",
+  "Playfair Display"
+];
 
 export const FontField = ({ control, fontKey, label }: FontFieldProps) => {
   return (
@@ -23,14 +36,21 @@ export const FontField = ({ control, fontKey, label }: FontFieldProps) => {
             {field.value.map((font: string, index: number) => (
               <div key={index} className="flex gap-2">
                 <FormControl>
-                  <Input
+                  <select
+                    className="w-full h-10 px-3 py-2 border rounded-md"
                     value={font}
                     onChange={(e) => {
                       const newValue = [...field.value];
                       newValue[index] = e.target.value;
                       field.onChange(newValue);
                     }}
-                  />
+                  >
+                    {GOOGLE_FONTS.map((font) => (
+                      <option key={font} value={font}>
+                        {font}
+                      </option>
+                    ))}
+                  </select>
                 </FormControl>
                 <Button
                   type="button"
@@ -51,12 +71,12 @@ export const FontField = ({ control, fontKey, label }: FontFieldProps) => {
               variant="outline"
               size="sm"
               onClick={() => {
-                field.onChange([...field.value, ""]);
+                field.onChange([...field.value, GOOGLE_FONTS[0]]);
               }}
               className="w-full"
             >
               <Plus className="h-4 w-4 mr-2" />
-              Add Font
+              Add Font Fallback
             </Button>
           </div>
           <FormMessage />

@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import type { Control } from "react-hook-form";
-import type { ThemeFormData } from "../types";
+import type { ThemeFormData } from "../types/theme";
 
 interface ColorFieldProps {
   control: Control<ThemeFormData>;
@@ -16,16 +16,16 @@ export const ColorField = ({ control, colorKey, label }: ColorFieldProps) => {
       name={`colors.${colorKey}`}
       render={({ field }) => (
         <FormItem>
-          <FormLabel className="capitalize">{label}</FormLabel>
+          <FormLabel>{label}</FormLabel>
           <div className="flex gap-2">
             <FormControl>
-              <Input {...field} />
+              <Input {...field} type="color" className="h-10 w-20 p-1" />
             </FormControl>
-            <div
-              className="w-10 h-10 rounded border"
-              style={{
-                backgroundColor: `hsl(${field.value})`,
-              }}
+            <Input 
+              value={field.value}
+              onChange={field.onChange}
+              placeholder="#000000"
+              className="flex-1"
             />
           </div>
           <FormMessage />
