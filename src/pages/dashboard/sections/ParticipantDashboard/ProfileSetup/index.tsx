@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileForm } from "./ProfileForm";
 import { Progress } from "@/components/ui/progress";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const ProfileSetup = () => {
   const [isCompleted, setIsCompleted] = useState(false);
@@ -28,31 +29,29 @@ const ProfileSetup = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6 p-6">
-      <div className="space-y-2">
-        <h2 className="text-2xl font-bold">Profile Setup</h2>
-        <p className="text-muted-foreground">
-          Complete your profile to get started with the platform
-        </p>
-      </div>
-
-      <div className="space-y-2">
-        <Progress value={progress} />
-        <p className="text-sm text-muted-foreground">
-          Profile completion: {progress}%
-        </p>
-      </div>
-
-      {!isCompleted && <ProfileForm onComplete={handleComplete} />}
-
-      {isCompleted && (
-        <div className="bg-green-50 p-4 rounded-md">
-          <p className="text-green-800">
-            Profile setup completed! You can now start exploring the platform.
+    <Card className="max-w-2xl mx-auto">
+      <CardHeader>
+        <CardTitle>Complete Your Profile</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-2">
+          <Progress value={progress} />
+          <p className="text-sm text-muted-foreground">
+            Profile completion: {progress}%
           </p>
         </div>
-      )}
-    </div>
+
+        {!isCompleted && <ProfileForm onComplete={handleComplete} />}
+
+        {isCompleted && (
+          <div className="bg-green-50 text-green-800 p-4 rounded-md">
+            <p>
+              Profile setup completed! You can now start exploring the platform.
+            </p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 

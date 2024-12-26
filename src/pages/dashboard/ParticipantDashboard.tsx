@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useSessionContext } from "@supabase/auth-helpers-react";
 import { supabase } from "@/integrations/supabase/client";
 import ProfileSetup from "./sections/ParticipantDashboard/ProfileSetup";
+import { Loader2 } from "lucide-react";
 
 const ParticipantDashboard = () => {
   const navigate = useNavigate();
@@ -39,19 +40,21 @@ const ParticipantDashboard = () => {
   };
 
   if (isOnboarded === null) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-6">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Participant Dashboard
-          </h1>
+          <h1 className="text-3xl font-bold">Participant Dashboard</h1>
           <button
             onClick={handleSignOut}
-            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+            className="px-4 py-2 bg-destructive text-destructive-foreground rounded-md hover:bg-destructive/90 transition-colors"
           >
             Sign Out
           </button>
@@ -60,8 +63,8 @@ const ParticipantDashboard = () => {
         {!isOnboarded ? (
           <ProfileSetup />
         ) : (
-          <div className="bg-white rounded-lg shadow p-6 mt-6">
-            <p className="text-gray-600">Welcome to your dashboard!</p>
+          <div className="bg-card rounded-lg shadow-sm p-6 mt-6">
+            <p className="text-card-foreground">Welcome to your dashboard!</p>
             {/* Add more dashboard content here */}
           </div>
         )}

@@ -21,7 +21,11 @@ const formSchema = z.object({
 
 type FormData = z.infer<typeof formSchema>;
 
-export const ProfileForm = ({ onComplete }: { onComplete: () => void }) => {
+interface ProfileFormProps {
+  onComplete: () => void;
+}
+
+export const ProfileForm = ({ onComplete }: ProfileFormProps) => {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
