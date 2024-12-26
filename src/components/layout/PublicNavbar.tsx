@@ -16,6 +16,9 @@ const PublicNavbar = () => {
           <Link to="/news" className="text-foreground/60 hover:text-foreground">
             News
           </Link>
+          <Link to="/gallery" className="text-foreground/60 hover:text-foreground">
+            Gallery
+          </Link>
           <Link to="/mentors" className="text-foreground/60 hover:text-foreground">
             Mentors
           </Link>
