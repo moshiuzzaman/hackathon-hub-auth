@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import type { SmtpConfig } from "./types";
 
 export const SmtpSettings = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  
   const { data: smtpSetting, refetch } = useQuery({
     queryKey: ["smtp-settings"],
     queryFn: async () => {
@@ -50,8 +52,32 @@ export const SmtpSettings = () => {
   };
 
   const handleTestConnection = async () => {
-    // TODO: Implement SMTP test connection
-    toast.info("SMTP test connection not implemented yet");
+    setIsLoading(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/test-smtp`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+          },
+          body: JSON.stringify(config),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success("SMTP connection test successful");
+      } else {
+        toast.error(`SMTP connection test failed: ${data.error}`);
+      }
+    } catch (error: any) {
+      toast.error(`Failed to test SMTP connection: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -126,8 +152,12 @@ export const SmtpSettings = () => {
 
         <div className="flex gap-2">
           <Button onClick={handleSave}>Save Settings</Button>
-          <Button variant="outline" onClick={handleTestConnection}>
-            Test Connection
+          <Button 
+            variant="outline" 
+            onClick={handleTestConnection}
+            disabled={isLoading}
+          >
+            {isLoading ? "Testing..." : "Test Connection"}
           </Button>
         </div>
       </CardContent>
