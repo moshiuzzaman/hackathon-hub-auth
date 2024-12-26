@@ -502,6 +502,50 @@ export type Database = {
         }
         Relationships: []
       }
+      themes: {
+        Row: {
+          colors: Json
+          created_at: string | null
+          created_by: string | null
+          fonts: Json
+          id: string
+          is_active: boolean | null
+          name: string
+          type: Database["public"]["Enums"]["theme_type"]
+          updated_at: string | null
+        }
+        Insert: {
+          colors: Json
+          created_at?: string | null
+          created_by?: string | null
+          fonts: Json
+          id?: string
+          is_active?: boolean | null
+          name: string
+          type?: Database["public"]["Enums"]["theme_type"]
+          updated_at?: string | null
+        }
+        Update: {
+          colors?: Json
+          created_at?: string | null
+          created_by?: string | null
+          fonts?: Json
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          type?: Database["public"]["Enums"]["theme_type"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "themes_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendors: {
         Row: {
           created_at: string
@@ -553,6 +597,7 @@ export type Database = {
     Enums: {
       legal_document_type: "terms" | "privacy"
       setting_type: "smtp" | "registration" | "system"
+      theme_type: "default" | "custom"
       user_role: "admin" | "organizer" | "moderator" | "mentor" | "participant"
     }
     CompositeTypes: {
