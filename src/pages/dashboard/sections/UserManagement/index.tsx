@@ -2,18 +2,18 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { UserPlus } from "lucide-react";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { UserTable } from "./UserTable";
 import { UserFilters } from "./UserFilters";
 import { CreateUserForm } from "./CreateUserForm";
 import { EditUserDialog } from "./EditUserDialog";
-import { UserProfile, EditUserFormValues, CreateUserFormValues, UserRole } from "./types";
+import { UserProfile, EditUserFormValues } from "./types";
 
 const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedRole, setSelectedRole] = useState<UserRole | "all" | null>(null);
+  const [selectedRole, setSelectedRole] = useState<string | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
 
@@ -42,7 +42,7 @@ const UserManagement = () => {
     return matchesSearch && matchesRole;
   });
 
-  const handleCreateUser = async (data: CreateUserFormValues) => {
+  const handleCreateUser = async (data: any) => {
     try {
       const { error: signUpError } = await supabase.auth.signUp({
         email: data.email,
@@ -90,14 +90,17 @@ const UserManagement = () => {
 
   const handleDeleteUser = async (userId: string) => {
     try {
-      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-      if (authError) throw authError;
+      const { error } = await supabase
+        .from("profiles")
+        .delete()
+        .eq("id", userId);
+
+      if (error) throw error;
 
       toast.success("User deleted successfully");
       refetch();
     } catch (error: any) {
       toast.error(error.message || "Failed to delete user");
-      throw error;
     }
   };
 
@@ -112,7 +115,7 @@ const UserManagement = () => {
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
           selectedRole={selectedRole}
-          onRoleChange={(role: UserRole | "all") => setSelectedRole(role)}
+          onRoleChange={setSelectedRole}
         />
         <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
           <DialogTrigger asChild>
@@ -128,10 +131,7 @@ const UserManagement = () => {
                 Add a new user to the platform. They will receive an email to confirm their account.
               </DialogDescription>
             </DialogHeader>
-            <CreateUserForm
-              onSubmit={handleCreateUser}
-              onCancel={() => setIsCreateModalOpen(false)}
-            />
+            <CreateUserForm onSubmit={handleCreateUser} onCancel={() => setIsCreateModalOpen(false)} />
           </DialogContent>
         </Dialog>
       </div>

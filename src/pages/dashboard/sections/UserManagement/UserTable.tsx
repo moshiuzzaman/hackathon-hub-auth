@@ -56,7 +56,7 @@ export const UserTable = ({ users, onDeleteUser, onEditUser }: UserTableProps) =
             </TableRow>
           </TableHeader>
           <TableBody>
-            {users?.map((user) => (
+            {users.map((user) => (
               <TableRow key={user.id}>
                 <TableCell>{user.full_name || "N/A"}</TableCell>
                 <TableCell className="capitalize">{user.role}</TableCell>
